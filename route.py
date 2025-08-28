@@ -1,8 +1,11 @@
 import os
+from datetime import datetime
 import pandas as pd
 from flask import Blueprint, request, redirect, url_for, flash, render_template
+from flask_login import  login_required
 from werkzeug.utils import secure_filename
 from models import db, School, Employee, District
+from helpers import get_or_create
 
 route_bp = Blueprint("upload", __name__, url_prefix="/upload")
 
@@ -14,6 +17,7 @@ def allowed_file(filename):
 
 
 @route_bp.route("/upload_schools", methods=["GET", "POST"])
+@login_required
 def upload_schools():
     if request.method == "POST":
         file = request.files["file"]
@@ -45,7 +49,7 @@ def upload_schools():
                     if dst:
                         district_id=dst.id
 
-                school = School(
+                '''school = School(
                     emis=emis,
                     name=name,
                     payment_source=payment_source,
@@ -54,10 +58,61 @@ def upload_schools():
                     allocation=allocation,
                     district_id=district_id
                 )
-                db.session.add(school)
+                db.session.add(school)'''
+                get_or_create(db.session,School,defaults={
+                    "name":name,
+                    "payment_source":payment_source,
+                    "circuit":circuit,
+                    "quintile":quintile,
+                    "allocation":allocation,
+                    "district_id":district_id
+                },emis=emis)
 
             db.session.commit()
             flash("Schools uploaded successfully!", "success")
             return redirect(url_for("school.index"))
 
     return render_template("schools_bulk_insert.html")
+
+@route_bp.route("/upload_assistants", methods=["GET", "POST"])
+@login_required
+def upload_employees():
+    if request.method == "POST":
+        file = request.files["file"]
+
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            filepath = os.path.join(UPLOAD_FOLDER, filename)
+            os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+            file.save(filepath)
+
+            # Read Excel file
+            df = pd.read_excel(filepath,skiprows=5,dtype={"ID number":str})
+
+            # Expected columns: emis, name, payment_source, circuit, quintile, allocation, district_id
+            for _, row in df.iterrows():
+                if str(row["District"]) == "Pixley Ka Seme (Pxl): Phase 5":
+                    schoolname = str(row["School"]).strip()
+                    emis = schoolname[:schoolname.index(" ")].strip()
+                    print(row)
+                    school_id = School.query.filter_by(emis=emis).first().id
+                    id_number = str(row["ID number"])
+                    firstname = str(row["Firstname"])
+                    surname = str(row["Surname"])
+                    start_date = row["Contract start"].date()
+                    #start_date = datetime.strptime(row["Contract start"],"%Y/%m/%d").date()
+                    contract_status= str(row["Contract status"])
+                    
+                    get_or_create(db.session,Employee,defaults= {
+                        "school_id":school_id,
+                        "firstname": firstname,
+                        "surname":surname,
+                        "start_date":start_date,
+                        "contract_status":contract_status
+                    },id_number=id_number)
+                    db.session.commit()
+
+            db.session.commit()
+            flash("Schools uploaded successfully!", "success")
+            return redirect(url_for("employee.index"))
+    return render_template("employees_bulk_insert.html")

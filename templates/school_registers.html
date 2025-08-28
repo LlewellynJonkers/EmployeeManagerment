@@ -1,37 +1,32 @@
 {% extends "layout.html" %}
 {% block content %}
-<h2>Schools</h2>
+<h2>Registers</h2>
 
-<a role="button" href="{{ url_for('upload.upload_schools') }}">Bulk insert</a>
-
-<h3>School list:</h3>
+<a role="button" href="{{ url_for('register.add') }}">Add new register</a>
 
 <table>
     <thead>
         <tr>
             <th>
-                Emis
+                Week
             </th>
             <th>
-                School name
+                Week start date
             </th>
             <th>
-                Payment Source
+                Week end date
             </th>
             <th>
-                Circuit
+                Attendents
             </th>
             <th>
-                Quintile
+                Leaves
             </th>
             <th>
-                Allocations
+                Absents
             </th>
             <th>
-                District
-            </th>
-            <th>
-                Province
+                Notes
             </th>
             <th>
 

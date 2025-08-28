@@ -8,9 +8,9 @@ from models import db, User,District,Province
 import os
 
 app = Flask(__name__)
-app.secret_key = "moresupersecretkey"  # Change in production
+app.secret_key = "moresupersecretkey1"  # Change in production
 
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///app3"
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///app4"
 db.init_app(app)
 
 login_manager = LoginManager()
@@ -31,6 +31,12 @@ def index():
     if not current_user.is_authenticated:
         return redirect(url_for("auth.login"))
     return render_template("index.html")
+
+@app.route("/admin/reset_all")
+def reset_all():
+    db.drop_all()
+    db.create_all()
+    return redirect(url_for("index"))
 
 if __name__ == "__main__":
     with app.app_context():

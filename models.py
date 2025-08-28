@@ -113,7 +113,7 @@ class Register(db.Model):
     school_id = db.Column(db.Integer, db.ForeignKey("school.id"), nullable=False)
     week_id = db.Column(db.Integer, db.ForeignKey("work_weeks.id"), nullable=False)
 
-    notes = db.Column(db.String(255))
+    notes = db.Column(db.String(255),nullable=True)
 
     entries = db.relationship(
         "RegisterEntry",

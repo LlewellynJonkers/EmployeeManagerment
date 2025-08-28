@@ -1,3 +1,74 @@
 {% extends "layout.html" %}
 {% block content %}
+
+<h2>Assistants</h2>
+
+<a role="button" href="{{ url_for('upload.upload_employees') }}">Bulk insert</a> <br/>
+{% if pagination.has_prev %}
+<a role="button" href="{{ url_for('employee.index',page=pagination.page-1) }}">prev</a> | 
+{% endif %}
+Page {{ pagination.page }}
+{%if pagination.has_next %}
+| <a role="button" href="{{ url_for('employee.index',page=pagination.page+1) }}">next</a> 
+{% endif %}
+<table>
+    <thead>
+        <tr>
+            <th>
+                Id Number
+            </th>
+            <th>
+                Firstname(s)
+            </th>
+            <th>
+                Surname
+            </th>
+            <th>
+                Cellnumber
+            </th>
+            <th>
+                Start Date
+            </th>
+            <th>
+                End Date
+            </th>
+            <th>
+                Status
+            </th>
+            <th>
+                School
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for emp in pagination.items %}
+            <tr>
+                <td>
+                    {{emp.id_number}}
+                </td>
+                <td>
+                    {{emp.firstname}}
+                </td>
+                <td>
+                    {{emp.surname}}
+                </td>
+                <td>
+                    {{emp.cellnumber}}
+                </td>
+                <td>
+                    {{emp.start_date}}
+                </td>
+                <td>
+                    {{emp.end_date}}
+                </td>
+                <td>
+                    {{emp.status}}
+                </td>
+                <td>
+                    {{emp.school.name}}
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
 {% endblock %}
