@@ -1,0 +1,18 @@
+<!doctype html>
+<html>
+<head>
+  <title>{{ title if title else "Employee Portal" }}</title>
+</head>
+<body>
+  {% if current_user.is_authenticated %}
+    <p>
+      Logged in as: {{ current_user.username }} |
+      <a href="{{ url_for('index') }}">Home</a> |
+      <a href="{{ url_for('school.index') }}">Schools</a> | 
+      <a href="{{ url_for('employee.index')}}">Employees</a>
+       </p>
+  {% endif %}
+  <hr>
+  {% block content %}{% endblock %}
+</body>
+</html>

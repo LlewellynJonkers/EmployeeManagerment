@@ -1,0 +1,70 @@
+{% extends "layout.html" %}
+{% block content %}
+<h2>Schools</h2>
+
+<a role="button" href="{{ url_for('upload.upload_schools') }}">Bulk insert</a>
+
+<h3>School list:</h3>
+
+<table>
+    <thead>
+        <tr>
+            <th>
+                Emis
+            </th>
+            <th>
+                School name
+            </th>
+            <th>
+                Payment Source
+            </th>
+            <th>
+                Circuit
+            </th>
+            <th>
+                Quintile
+            </th>
+            <th>
+                Allocations
+            </th>
+            <th>
+                District
+            </th>
+            <th>
+                Province
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for s in schools %}
+            <tr>
+                <td>
+                    {{s.emis}}
+                </td>
+                <td>
+                    {{s.name}}
+                </td>
+                <td>
+                    {{s.payment_source}}
+                </td>
+                <td>
+                    {{s.circuit}}
+                </td>
+                <td>
+                    {{s.quintile}}
+                </td>
+                <td>
+                    {{s.allocation}}
+                </td>
+                <td>
+                    Pixley ka Seme
+                </td>
+                <td>
+                    Northern Cape
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}
