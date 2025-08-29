@@ -28,12 +28,6 @@
                 Allocations
             </th>
             <th>
-                District
-            </th>
-            <th>
-                Province
-            </th>
-            <th>
 
             </th>
             <th>
@@ -63,16 +57,10 @@
                     {{s.allocation}}
                 </td>
                 <td>
-                    {{s.district.name}}
-                </td>
-                <td>
-                    {{s.district.province.name}}
-                </td>
-                <td>
                     <a href="{{ url_for('register.school_registers',school_id=s.id)}}">Registers</a>
                 </td>
                 <td>
-                    <a href="{{ url_for('school.edit,school_id=s.id')}}">Edit</a>
+                    <a href="{{ url_for('school.edit',school_id=s.id)}}">Edit</a>
                 </td>
             </tr>
         {% endfor %}

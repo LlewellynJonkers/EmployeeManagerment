@@ -1,3 +1,16 @@
+entry_statuses = [
+    "present",
+    "absent",
+    "annual leave",
+    "sick leave",
+    "school closed",
+    "family resp leave",
+    "special leave",
+    "pre-natal leave",
+    "maternity leave",
+    "parternal leave",
+    "other"
+]
 def get_or_create(session,model,defaults=None,**kwargs):
     defaults = defaults if defaults else {}
     instance = model.query.filter_by(**kwargs).first()

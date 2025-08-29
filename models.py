@@ -84,6 +84,13 @@ class School(db.Model):
     employees = db.relationship('Employee', back_populates='school')
     registers = db.relationship("Register", back_populates="school")
 
+    def get_register(self,workweek):
+        return next(
+            filter(
+                lambda register: register.week_id==workweek.id,
+                self.registers),
+                default=None)
+
 
 class Employee(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -113,6 +120,8 @@ class Register(db.Model):
     school_id = db.Column(db.Integer, db.ForeignKey("school.id"), nullable=False)
     week_id = db.Column(db.Integer, db.ForeignKey("work_weeks.id"), nullable=False)
 
+
+
     notes = db.Column(db.String(255),nullable=True)
 
     entries = db.relationship(
@@ -126,6 +135,9 @@ class Register(db.Model):
     __table_args__ = (
         db.UniqueConstraint("school_id", "week_id", name="uq_school_week"),
     )
+    
+    def get_status_count(self,status):
+        return len([entry for entry in self.entries if entry.status == status])
 
 
 class RegisterEntry(db.Model):
@@ -135,7 +147,7 @@ class RegisterEntry(db.Model):
     register_id = db.Column(db.Integer, db.ForeignKey("registers.id"), nullable=False)
     employee_id = db.Column(db.Integer, db.ForeignKey("employee.id"), nullable=False)
     day_of_week = db.Column(db.String(10), nullable=False)  
-    status = db.Column(db.String(20), nullable=False)        
+    status = db.Column(db.String(20), nullable=False)       
 
     register = db.relationship("Register", back_populates="entries")
     employee = db.relationship("Employee", back_populates="entries")
