@@ -89,7 +89,7 @@ class School(db.Model):
             filter(
                 lambda register: register.week_id==workweek.id,
                 self.registers),
-                default=None)
+                None)
 
 
 class Employee(db.Model):

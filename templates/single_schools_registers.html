@@ -33,9 +33,11 @@
         </tr>
     </thead>
     <tbody>
-        {% for week in work_weeks %}
+        {% for week in workweeks %}
         {% set register = school.get_register(week) %}
+        <!-- {{ register }} -->
         {% if register %}
+        
             <tr>
                 <td>
                     {{register.work_week.label}}
