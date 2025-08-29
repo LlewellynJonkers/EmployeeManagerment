@@ -43,6 +43,7 @@ def add_school_register():
                             get_or_create(db.session,RegisterEntry,defaults={"employee_id":emp.id,"register_id":register.id, "day_of_week":day_name,"date":day_date,"status":status},
                                   employee_id=emp.id,register_id=register.id,day_of_week=day_name)
                 db.session.commit()
-                flash("Register saved successfully!","success")
+                flash("Register saved successfully!","success") 
 
                 return redirect(url_for("register.school_registers",school_id=school.id))
+    return render_template("create_school_register.html")
