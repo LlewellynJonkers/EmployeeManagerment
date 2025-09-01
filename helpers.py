@@ -23,4 +23,4 @@ def get_or_create(session,model,defaults=None,**kwargs):
         params.update(defaults)
         instance = model(**params)
         session.add(instance)
-        return session, True
+        return instance, True

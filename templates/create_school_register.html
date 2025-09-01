@@ -1,0 +1,50 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="container mt-4">
+  <h2>Create School Register</h2>
+
+  <form method="POST">
+
+    {% if school and week %}
+    <!-- Attendance Table -->
+    <div class="table-responsive mt-4">
+      <table class="table table-bordered">
+        <thead class="table-light">
+          <tr>
+            <th>Employee</th>
+            {% for day_offset in range(5) %}
+              {% set day_date = week.start_date + day_offset|timedelta %}
+              <th>{{ day_date.strftime("%A") }}<br>{{ day_date.strftime("%d %b") }}</th>
+            {% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for emp in school.employees|sort(attribute="surname") %}
+          <tr>
+            <td>{{ emp.surname }}, {{ emp.name }}</td>
+            {% for day_offset in range(5) %}
+              {% set day_date = week.start_date + day_offset|timedelta %}
+              {% set day_name = day_date.strftime("%A") %}
+              <td>
+                <select class="form-select form-select-sm"
+                        name="status_{{ emp.id }}_{{ day_name }}">
+                    {% for status in statuses %}
+                      <option value="{{ status }}"
+                        {% if loop.index0 == default_status_index %}selected{% endif %}>
+                        {{ status }}
+                      </option>
+                    {% endfor %}
+                </select>
+              </td>
+            {% endfor %}
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% endif %}
+
+    <button type="submit" class="btn btn-primary mt-3">Save Register</button>
+  </form>
+</div>
+{% endblock %}

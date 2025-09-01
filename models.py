@@ -147,6 +147,7 @@ class RegisterEntry(db.Model):
     register_id = db.Column(db.Integer, db.ForeignKey("registers.id"), nullable=False)
     employee_id = db.Column(db.Integer, db.ForeignKey("employee.id"), nullable=False)
     day_of_week = db.Column(db.String(10), nullable=False)  
+    date = db.Column(db.Date, nullable=False)
     status = db.Column(db.String(20), nullable=False)       
 
     register = db.relationship("Register", back_populates="entries")

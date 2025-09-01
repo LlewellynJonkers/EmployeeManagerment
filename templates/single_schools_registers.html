@@ -71,15 +71,18 @@
                     {{register.notes}}
                 </td>
                 <td>
-                    <!-- <a href="{{ url_for('school.edit',id=s.id)}}">Edit</a> -->
+                    <a href="{{ url_for('school.edit',id=school.id)}}">Edit</a>
                 </td>
             </tr>
             {% else %}
                 <tr>
-                    <th colspan="7">
+                    <td>{{ week.label }}</td>
+                    <td>{{ week.start_date }}</td>
+                    <td>{{ week.end_date }}</td>
+                    <td colspan="4">
                         The register for this week has not been recorded
-                    </th>
-                    <th></th>
+                    </td>
+                    <td><a role="button" href="{{ url_for('register.add_school_register',school_id=school.id, week_id = week.id ) }}">Add</a></td>
                 </tr>
             {% endif %}
         {% endfor %}
