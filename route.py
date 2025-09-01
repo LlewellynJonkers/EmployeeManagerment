@@ -33,40 +33,38 @@ def upload_schools():
 
             # Expected columns: emis, name, payment_source, circuit, quintile, allocation, district_id
             for _, row in df.iterrows():
-                emis = str(row["EMIS"]).strip()
-                name = str(row["School Name"]).strip()
-                payment_source = str(row["Payment Method"])
-                quintile = int(row["Quintile"])
-                circuit = int(row["Circuit"])
-                allocation = int(row["Grand Total"])
-                district_id = 0
-                if(row["District"] == "Pixley ka Seme"):
-                    district_name = "Pixley Ka Seme (Pxl): Phase 5"
-                    dst = District.query.filter_by(name=district_name).first()
-                    district_id = dst.id
-                else:
-                    dst = District.query.filter_by(name=row["District"]).first()
-                    if dst:
-                        district_id=dst.id
+                try:
+                    if not( row["District"] == "Pixley ka Seme" or row["District"] == "Pixley Ka Seme (Pxl): Phase 5"):
+                        continue
+                    emis = str(row["EMIS"]).strip()
+                    name = str(row["School Name"]).strip()
+                    payment_source = str(row["Payment Method"])
+                    quintile = int(row["Quintile"])
+                    circuit = int(row["Circuit"])
+                    allocation = int(row["Grand Total"])
+                    district_id = 0
+                    if(row["District"] == "Pixley ka Seme"):
+                        district_name = "Pixley Ka Seme (Pxl): Phase 5"
+                        dst = District.query.filter_by(name=district_name).first()
+                        district_id = dst.id
+                    else:
+                        dst = District.query.filter_by(name=row["District"]).first()
+                        if dst:
+                            district_id=dst.id
 
-                '''school = School(
-                    emis=emis,
-                    name=name,
-                    payment_source=payment_source,
-                    circuit=circuit,
-                    quintile=quintile,
-                    allocation=allocation,
-                    district_id=district_id
-                )
-                db.session.add(school)'''
-                get_or_create(db.session,School,defaults={
-                    "name":name,
-                    "payment_source":payment_source,
-                    "circuit":circuit,
-                    "quintile":quintile,
-                    "allocation":allocation,
-                    "district_id":district_id
-                },emis=emis)
+                    
+                    get_or_create(db.session,School,defaults={
+                        "name":name,
+                        "payment_source":payment_source,
+                        "circuit":circuit,
+                        "quintile":quintile,
+                        "allocation":allocation,
+                        "district_id":district_id
+                    },emis=emis)
+                except Exception as e:
+                    print(f"Error processing row: {row}. Error: {e}")
+                    flash(f"Error processing row: {row}. Error: {e}", "danger")
+
 
             db.session.commit()
             flash("Schools uploaded successfully!", "success")
@@ -94,7 +92,6 @@ def upload_employees():
                 if str(row["District"]) == "Pixley Ka Seme (Pxl): Phase 5":
                     schoolname = str(row["School"]).strip()
                     emis = schoolname[:schoolname.index(" ")].strip()
-                    print(row)
                     school_id = School.query.filter_by(emis=emis).first().id
                     id_number = str(row["ID number"])
                     firstname = str(row["Firstname"])
@@ -111,7 +108,7 @@ def upload_employees():
                         "contract_status":contract_status
                     },id_number=id_number)
                     db.session.commit()
-
+                    
             db.session.commit()
             flash("Schools uploaded successfully!", "success")
             return redirect(url_for("employee.index"))

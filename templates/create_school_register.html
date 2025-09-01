@@ -1,8 +1,9 @@
 {% extends "layout.html" %}
 {% block content %}
 <div class="container mt-4">
-  <h2>Create School Register</h2>
+  <h2>Create School Register for {{ school.name }}</h2>
 
+  <h3>Register for {{ week.label }}</h3>
   <form method="POST">
 
     {% if school and week %}
@@ -21,7 +22,8 @@
         <tbody>
           {% for emp in school.employees|sort(attribute="surname") %}
           <tr>
-            <td>{{ emp.surname }}, {{ emp.name }}</td>
+            <th> {{ emp}}</th>
+            <td>{{ emp.surname }}, {{ emp.firstname }}</td>
             {% for day_offset in range(5) %}
               {% set day_date = week.start_date + day_offset|timedelta %}
               {% set day_name = day_date.strftime("%A") %}
@@ -43,6 +45,11 @@
       </table>
     </div>
     {% endif %}
+
+    <div class="mb-2 pt-2">
+      <label class="form-label">Notes</label>
+      <textarea name="notes" class="form-control form-control-sm" rows="2" placeholder="Add notes...">{{ existing_notes if existing_notes else '' }}</textarea>
+    </div>
 
     <button type="submit" class="btn btn-primary mt-3">Save Register</button>
   </form>

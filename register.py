@@ -48,8 +48,7 @@ def add_school_register():
                         day_name = day_date.strftime("%A")
                         status = request.form.get(f"status_{emp.id}_{day_name}")
                         if status:
-                            print(f"Saving entry for {emp.firstname} {emp.surname} on {day_name} ({day_date}): {status}\n\nthe type for emp is {type(emp)} \nthe type for register is {type(register)}")
-                            input("press enter to continue...")
+                            print(f"Saving entry for {emp.firstname} {emp.surname} on {day_name} ({day_date}): {status}")
                             get_or_create(db.session,RegisterEntry,defaults={"employee_id":emp.id,"register_id":register.id, "day_of_week":day_name,"date":day_date,"status":status},
                                   employee_id=emp.id,register_id=register.id,day_of_week=day_name)
                 db.session.commit()

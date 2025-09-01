@@ -1,92 +1,104 @@
 {% extends "layout.html" %}
+
+{% block title %}{{ school.name }} Registers{% endblock %}
+
 {% block content %}
-<h2>{{ school.name }}</h2>
+<h2 class="page-title"><a href="{{ url_for('school.details',emis=school.emis)}}">{{ school.name }} - Registers</a></h2>
+<hr class="hr"/>
 
-<a role="button" href="{{ url_for('upload.upload_schools') }}">Bulk insert</a>
-
-<h3>Registers</h3>
-
-<table>
-    <thead>
-        <tr>
-            <th>
-                Week Label
-            </th>
-            <th>
-                Start Date
-            </th>
-            <th>
-                End Date
-            </th>
-            <th>
-                Attendents
-            </th>
-            <th>
-                Leaves (all)
-            </th>
-            <th>
-                Absents
-            </th>
-            <th>
-                Notes
-            </th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for week in workweeks %}
-        {% set register = school.get_register(week) %}
-        <!-- {{ register }} -->
-        {% if register %}
-        
+<div class="card card-sm">
+  <div class="table-responsive">
+    <table class="table table-vcenter table-sm card-table">
+        <thead>
             <tr>
-                <td>
-                    {{register.work_week.label}}
-                </td>
-                <td>
-                    {{register.work_week.start_date}}
-                </td>
-                <td>
-                    {{register.work_week.end_date}}
-                </td>
-                <td>
-                    {{register.get_status_count("present")}}
-                </td>
-                <td>
-                    {{
-                        register.get_status_count("sick leave") + 
-                        register.get_status_count("annual leave")+
-                        register.get_status_count("special leave")+
-                        register.get_status_count("other leave") +
-                        register.get_status_count("family resp leave")+
-                        register.get_status_count("pre-natal leave")+
-                        register.get_status_count("recess or holiday")+
-                        register.get_status_count("parternal leave")+
-                        register.get_status_count("maternity leave")
-                    }}                 
-                </td>
-                <td>
-                    {{register.get_status_count("absent")}}
-                </td>
-                <td>
-                    {{register.notes}}
-                </td>
-                <td>
-                    <a href="{{ url_for('school.edit',id=school.id)}}">Edit</a>
-                </td>
+                <th>
+                    Week Label
+                </th>
+                <th>
+                    Start Date
+                </th>
+                <th>
+                    End Date
+                </th>
+                <th>
+                    Attendents
+                </th>
+                <th>
+                    Leaves (all)
+                </th>
+                <th>
+                    Absents
+                </th>
+                <th>
+                    Notes
+                </th>
+                <th>Actions</th>
             </tr>
-            {% else %}
+        </thead>
+        <tbody>
+            {% for week in workweeks %}
+            {% set register = school.get_register(week) %}
+            <!-- {{ register }} -->
+            {% if register %}
+            
                 <tr>
-                    <td>{{ week.label }}</td>
-                    <td>{{ week.start_date }}</td>
-                    <td>{{ week.end_date }}</td>
-                    <td colspan="4">
-                        The register for this week has not been recorded
+                    <td>
+                        {{register.work_week.label}}
                     </td>
-                    <td><a role="button" href="{{ url_for('register.add_school_register',school_id=school.id, week_id = week.id ) }}">Add</a></td>
+                    <td>
+                        {{register.work_week.start_date}}
+                    </td>
+                    <td>
+                        {{register.work_week.end_date}}
+                    </td>
+                    <td>
+                        {{register.get_status_count("present")}}
+                    </td>
+                    <td>
+                        {{
+                            register.get_status_count("sick leave") + 
+                            register.get_status_count("annual leave")+
+                            register.get_status_count("school closed")+
+                            register.get_status_count("special leave")+
+                            register.get_status_count("other leave") +
+                            register.get_status_count("family resp leave")+
+                            register.get_status_count("pre-natal leave")+
+                            register.get_status_count("recess or holiday")+
+                            register.get_status_count("parternal leave")+
+                            register.get_status_count("maternity leave")
+                        }}                 
+                    </td>
+                    <td>
+                        {{register.get_status_count("absent")}}
+                    </td>
+                    <td>
+                        {{register.notes}}
+                    </td>
+                    <td>
+                        <div class="btn-list flex-nowrap">
+                            <a href="{{ url_for('register.add_school_register', school_id=school.id, week_id=week.id) }}" class="btn btn-sm btn-outline-primary">Edit</a>
+                        </div>
+                    </td>
                 </tr>
-            {% endif %}
-        {% endfor %}
-    </tbody>
-</table>
+                {% else %}
+                    <tr>
+                        <td>{{ week.label }}</td>
+                        <td>{{ week.start_date }}</td>
+                        <td>{{ week.end_date }}</td>
+                        <td colspan="4">
+                            <span class="text-warning">The register for this week has not been recorded</span>
+                        </td>
+                        <td>
+                            <div class="btn-list flex-nowrap">
+                                <a href="{{ url_for('register.add_school_register', school_id=school.id, week_id=week.id) }}" class="btn btn-sm btn-outline-success">Add</a>
+                            </div>
+                        </td>
+                    </tr>
+                {% endif %}
+            {% endfor %}
+        </tbody>
+    </table>
+  </div>
+</div>
 
 {% endblock %}
