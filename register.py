@@ -36,7 +36,9 @@ def add_school_register():
     if request.method=="POST":
         if school_id and week_id:
             if school and week:
-                register, _ = get_or_create(db.session,Register,defaults={"school_id":school.id,"week_id":week.id},
+                notes = request.form.get("notes")
+                notes = notes if notes else None
+                register, _ = get_or_create(db.session,Register,defaults={"school_id":school.id,"week_id":week.id,"notes":notes},
                                          school_id=school.id,week_id=week.id)
                 print(f"the type for register is {type(register)}")
                 db.session.commit()

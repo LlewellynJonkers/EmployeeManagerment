@@ -11,9 +11,9 @@ from datetime import date, timedelta
 import os
 
 app = Flask(__name__)
-app.secret_key = "moresupersecretkey1"  # Change in production
+app.secret_key = "pyeibeeipixleyusermanagementsecretkey"  # Change in production
 
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///app4"
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///user_management.db"
 db.init_app(app)
 
 login_manager = LoginManager()

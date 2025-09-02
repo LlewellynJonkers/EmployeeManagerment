@@ -28,8 +28,19 @@
             <li class="nav-item">
               <a class="nav-link {% if request.endpoint.startswith('employee') %}active{% endif %}" href="{{ url_for('employee.index') }}">Employees</a>
             </li>
+            {% if current_user.is_authenticated and current_user.role == 'admin' %}
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('set_defaults') }}">Load defaults</a>
+            </li>
+            {% endif %}
           </ul>
+          {% if current_user.role == 'admin'%}
+            <a href="{{ url_for('upload.upload_schools') }}" class="btn btn-outline-primary me-2">Bulk Upload Schools</a>
+            <a href="{{ url_for('upload.upload_employees') }}" class="btn btn-outline-primary me-2">Bulk Upload Employees</a>
+          {% endif %}
         </div>
+
+        
 
         <!-- User Dropdown / Login -->
         <div class="navbar-nav flex-row order-md-last">

@@ -1,0 +1,16 @@
+<nav class="bg-gray-800 text-white p-2 flex justify-between items-center rounded-md shadow-md">
+    <!-- Left Section -->
+    <div class="flex space-x-4">
+        <a href="{{ url_for('index') }}" class="hover:bg-gray-700 px-3 py-2 rounded-md">Dashboard</a>
+        <a href="{{ url_for('school.index') }}" class="hover:bg-gray-700 px-3 py-2 rounded-md">Schools</a>
+        <a href="{{ url_for('employee.index') }}" class="hover:bg-gray-700 px-3 py-2 rounded-md">Employees</a>
+        <a href="{{ url_for('upload.upload_schools') }}" class="hover:bg-gray-700 px-3 py-2 rounded-md">Bulk Upload</a>
+        <a href="{{ url_for('auth.register') }}" class="hover:bg-gray-700 px-3 py-2 rounded-md">Users</a>
+    </div>
+
+    <!-- Right Section -->
+    <div class="flex space-x-4">
+        <span class="italic">Admin Panel</span>
+        <a href="{{ url_for('auth.logout') }}" class="bg-red-600 hover:bg-red-700 px-3 py-2 rounded-md">Logout</a>
+    </div>
+</nav>

@@ -42,15 +42,9 @@
             {% if register %}
             
                 <tr>
-                    <td>
-                        {{register.work_week.label}}
-                    </td>
-                    <td>
-                        {{register.work_week.start_date}}
-                    </td>
-                    <td>
-                        {{register.work_week.end_date}}
-                    </td>
+                     <td>{{ week.label }}</td>
+                        <td>{{ week.start_date.strftime("%d %B %Y") }}</td>
+                        <td>{{ week.end_date.strftime("%d %B %Y") }}</td>
                     <td>
                         {{register.get_status_count("present")}}
                     </td>
@@ -71,8 +65,10 @@
                     <td>
                         {{register.get_status_count("absent")}}
                     </td>
-                    <td>
-                        {{register.notes}}
+                    <td class="px-2 py-1">
+                        <span class="inline-block w-5 overflow-hidden whitespace-nowrap truncate" style="max-width: 80px;  ">
+                            {{register.notes}}
+                        </span>
                     </td>
                     <td>
                         <div class="btn-list flex-nowrap">
@@ -83,8 +79,8 @@
                 {% else %}
                     <tr>
                         <td>{{ week.label }}</td>
-                        <td>{{ week.start_date }}</td>
-                        <td>{{ week.end_date }}</td>
+                        <td>{{ week.start_date.strftime("%d %B %Y") }}</td>
+                        <td>{{ week.end_date.strftime("%d %B %Y") }}</td>
                         <td colspan="4">
                             <span class="text-warning">The register for this week has not been recorded</span>
                         </td>
