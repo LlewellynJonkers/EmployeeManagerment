@@ -15,6 +15,7 @@
         <tr>
           <th>EMIS</th>
           <th>Name</th>
+          <th>Registers</th>
           <th>District</th>
           <th>Province</th>
           <th class="w-1">Actions</th>
@@ -25,6 +26,7 @@
         <tr>
           <td><a href="{{ url_for('school.details', emis=school.emis) }}">{{ school.emis }}</a></td>
           <td><a href="{{ url_for('school.details', emis=school.emis) }}" >{{ school.name }}</a></td>
+          <td>{{ school.registers|length }}</td>
           <td>{{ school.district.name if school.district else '' }}</td>
           <td>{{ school.district.province.name if school.district.province else '' }}</td>
           <td>
