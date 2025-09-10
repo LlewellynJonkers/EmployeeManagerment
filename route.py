@@ -97,6 +97,7 @@ def upload_employees():
                     firstname = str(row["Firstname"])
                     surname = str(row["Surname"])
                     start_date = row["Contract start"].date()
+                    end_date = row["Contract end date"].date() if not pd.isna(row["Contract end date"]) else None
                     #start_date = datetime.strptime(row["Contract start"],"%Y/%m/%d").date()
                     contract_status= str(row["Contract status"])
                     
@@ -105,7 +106,8 @@ def upload_employees():
                         "firstname": firstname,
                         "surname":surname,
                         "start_date":start_date,
-                        "contract_status":contract_status
+                        "contract_status":contract_status,
+                        "end_date":end_date
                     },id_number=id_number)
                     db.session.commit()
                     
