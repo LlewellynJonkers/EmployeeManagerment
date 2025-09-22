@@ -1,0 +1,53 @@
+{% extends "layout.html" %}
+
+{% block title %}Register{% endblock %}
+
+{% block content %}
+<div class="page-center">
+  <div class="container-tight py-4">
+    <div class="text-center mb-4">
+      <h2>User Management</h2>
+    </div>
+
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <div class="alert alert-success">
+          {{ messages[0] }}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <form class="card card-sm" method="POST">
+      <div class="card-body">
+        <h2 class="card-title text-center mb-4">Register</h2>
+
+        <div class="mb-3">
+          <label class="form-label">Username</label>
+          <input type="text" name="username" class="form-control" required>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Password</label>
+          <input type="password" name="password" class="form-control" required>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Role</label>
+          <select name="role" class="form-select" required>
+            <option value="User">User</option>
+            <option value="Admin">Viewer</option>
+            <option value"Approver">Approver</option>
+          </select>
+        </div>
+
+        <div class="form-footer">
+          <button type="submit" class="btn btn-primary w-100">Create Account</button>
+        </div>
+      </div>
+      <div class="card-footer text-center">
+        Already registered? <a href="{{ url_for('auth.login') }}">Login</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

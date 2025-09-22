@@ -1,0 +1,144 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="container mt-4">
+  <h2>Create School Register for {{ school.name }}</h2>
+
+    <a href="{{ url_for('register.school_registers',school_id=school.id) }}" class="btn btn-secondary mb-3">&larr; Back to School Registers</a>
+    <button id="set-all-btn"
+          class="btn btn-primary mb-3 ms-2">
+    Set All Statuses
+  </button>
+
+  <h3>Register for {{ week.label }}</h3>
+  <form method="POST">
+
+    {% if school and week %}
+    <!-- Attendance Table -->
+    <div class="table-responsive mt-4">
+      <table class="table table-bordered">
+        <thead class="table-light">
+          <tr>
+            <th>ID Number</th>
+            <th>Employee</th>
+            {% for day_offset in range(5) %}
+              {% set day_date = week.start_date + day_offset|timedelta %}
+              <th>{{ day_date.strftime("%A") }}<br>{{ day_date.strftime("%d %b") }}</th>
+            {% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for emp in school.employees|sort(attribute="surname") %}
+          
+          
+          <tr>
+            <th> {{ emp.id_number }}</th>
+            <td>{{ emp.surname }}, {{ emp.firstname }}</td>
+            {% for day_offset in range(5) %}
+              {% set day_date = week.start_date + day_offset|timedelta %}
+              {% set day_name = day_date.strftime("%A") %}
+              {% set enabled = True %}
+              
+
+              {% if emp.end_date and emp.end_date < day_date %}
+                {% set default_status_index = statuses.index('not active') %}
+                {% set enabled = False %}
+              {% elif emp.start_date > day_date %}
+                {% set default_status_index = statuses.index('not active') %}
+                {% set enabled = False %}
+              {% else %}
+                {% set default_status_index = statuses.index('present') %}
+              {% endif %}
+              <td>
+                <select class="status-select px-1 py-0.5 rounded text-xs form-select form-select-sm"
+                        name="status_{{ emp.id }}_{{ day_name }}" {% if not enabled %}disabled{% endif %}>
+                    {% for status in statuses %}
+                      <option value="{{ status }}"
+                        {% if loop.index0 == default_status_index %}selected{% endif %}>
+                        {{ status }}
+                      </option>
+                    {% endfor %}
+                </select>
+              </td>
+            {% endfor %}
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+      <div class="alert alert-warning">
+        <strong>Error:</strong> School or Week information is missing. Please go back and select a school and week.
+      </div>
+    {% endif %}
+
+    <div class="mb-2 pt-2">
+      <label class="form-label">Notes</label>
+      <textarea name="notes" class="form-control form-control-sm" rows="2" placeholder="Add notes...">{{ existing_notes if existing_notes else '' }}</textarea>
+    </div>
+
+    <button type="submit" class="btn btn-primary mt-3">Save Register</button>
+  </form>
+</div>
+{% endblock %}
+
+
+
+
+{% block scripts %}
+<script>
+  
+  document.getElementById("set-all-btn").addEventListener("click", () => {
+      const status = prompt("Enter status ({{ ', '.join(statuses)}}):");
+      const validStatuses = "{{ ', '.join(statuses) }}".split(", ").map(s => s.trim());
+      let selects = document.querySelectorAll(".status-select")
+      if (status && validStatuses.includes(status)) {
+        selects.forEach(select => {
+          if (!select.disabled)  // Skip disabled selects
+            select.value = status;
+          //applyColor(select);
+        });
+      } else if (status) {
+        alert("Invalid status entered!");
+      }
+    });
+
+
+    const colors = {
+        "present": "bg-green-200 text-green-900",
+        "absent": "bg-red-200 text-red-900",
+        "leave": "bg-yellow-200 text-yellow-900",
+        "other": "bg-blue-200 text-blue-900"
+    };
+
+    document.addEventListener("DOMContentLoaded", function () {
+      document.querySelectorAll(".status-select").forEach(select => {
+        const applyColor = () => {
+          // Reset to your base classes
+          const baseClasses = [
+            "status-select",
+            "px-1",
+            "py-0.5",
+            "rounded",
+            "text-xs",
+            "form-select",
+            "form-select-sm"
+          ];
+          select.className = ""; // clear all
+          select.classList.add(...baseClasses);
+
+          // Add color classes if found
+          const colorClass = colors[select.value];
+          if (colorClass) {
+            const classes = colorClass.trim().split(/\s+/); // handles multiple spaces
+            select.classList.add(...classes);
+          }
+        };
+
+        // Apply on load and when changed
+        applyColor();
+        select.addEventListener("change", applyColor);
+      });
+    });
+
+</script>
+{% endblock %}

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>{% block title %}User Management{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta20/dist/css/tabler.min.css" rel="stylesheet">
+    {% block head %}{% endblock %}
+  </head>
+  <body class="layout-fluid">
+
+    <!-- Navbar -->
+    <header class="navbar navbar-expand-md navbar-light d-print-none">
+      <div class="container-xl">
+        <a href="{{ url_for('index') }}" class="navbar-brand">
+          <span class="navbar-brand-text">User Manager</span>
+        </a>
+
+        <!-- Navigation Links -->
+        <div class="collapse navbar-collapse">
+          <ul class="navbar-nav me-auto mb-2 mb-md-0">
+            <li class="nav-item">
+              <a class="nav-link {% if request.endpoint == 'index' %}active{% endif %}" href="{{ url_for('index') }}">Home</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link {% if request.endpoint.startswith('school') %}active{% endif %}" href="{{ url_for('school.index') }}">Schools</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link {% if request.endpoint.startswith('employee') %}active{% endif %}" href="{{ url_for('employee.index') }}">Employees</a>
+            </li>
+            {% if current_user.is_authenticated and current_user.role == 'admin' %}
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('set_defaults') }}">Load defaults</a>
+            </li>
+            {% endif %}
+          </ul>
+          {% if current_user.role == 'admin'%}
+            <a href="{{ url_for('upload.upload_schools') }}" class="btn btn-outline-primary me-2">Bulk Upload Schools</a>
+            <a href="{{ url_for('upload.upload_employees') }}" class="btn btn-outline-primary me-2">Upload SC03 report</a>
+            <a href="#" class="btn btn-outline-primary me-2">Upload SC04 report</a>
+          {% endif %}
+        </div>
+
+        
+
+        <!-- User Dropdown / Login -->
+        <div class="navbar-nav flex-row order-md-last">
+          {% if current_user.is_authenticated %}
+            <div class="nav-item dropdown">
+              <a href="#" class="nav-link d-flex lh-1 text-reset p-0" data-bs-toggle="dropdown" aria-label="Open user menu">
+                <span class="avatar avatar-sm">{{ current_user.username[0]|upper }}</span>
+                <div class="d-none d-xl-block ps-2">
+                  <div>{{ current_user.username }}</div>
+                  <div class="mt-1 small text-muted">{{ current_user.role }}</div>
+                </div>
+              </a>
+              <div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
+                <a href="{{ url_for('auth.logout') }}" class="dropdown-item">Logout</a>
+              </div>
+            </div>
+          {% else %}
+            <a href="{{ url_for('auth.login') }}" class="btn btn-outline-primary">Login</a>
+          {% endif %}
+        </div>
+      </div>
+    </header>
+
+    <!-- Page Content -->
+    <div class="page-wrapper">
+      <div class="page-body container-xl py-4">
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            <div class="alert alert-info">
+              {{ messages[0] }}
+            </div>
+          {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta20/dist/js/tabler.min.js"></script>
+    {% block scripts %}{% endblock %}
+  </body>
+</html>

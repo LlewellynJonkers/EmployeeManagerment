@@ -1,0 +1,55 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="container mt-4">
+  <h2>Register Report</h2>
+  <div>
+    <form class="form mb-3" method="GET">
+      <div class="form-group">
+        <label for="start_week" class="form-label">Start Week:</label>
+        <select id="start_week" class="form-select form-select-sm" name="start_week">
+            {% for week in weeks %}
+                <option value="{{ week.id }}" {% if week.id == request.args.get('start_week', 1)|int %}selected{% endif %}>
+                    {{ week.label }} ({{ week.start_date.strftime("%d %b %Y") }} - {{ week.end_date.strftime("%d %b %Y") }})
+                </option>
+            {% endfor %}
+        </select>
+      </div>
+      <div class="form-group mt-2">
+        <label for="end_week" class="form-label">End Week:</label>
+        <select id="end_week" class="form-select form-select-sm" name="end_week">
+            {% for week in weeks %}
+                <option value="{{ week.id }}" {% if week.id == request.args.get('end_week', weeks|length)|int %}selected{% endif %}>
+                    {{ week.label }} ({{ week.start_date.strftime("%d %b %Y") }} - {{ week.end_date.strftime("%d %b %Y") }})
+                </option>
+            {% endfor %}  
+        </select>
+      </div>
+        <button type="submit" class="btn btn-primary btn-sm mt-2">Generate Report</button> 
+
+    </form>
+  </div>
+  <div>
+    <table class="table table-bordered table-sm">
+      <thead class="table-light">
+        <tr>
+          {% for header in headers %}
+            <th>{{ header }}</th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in report_data %}
+          <tr>
+            <td>{{ row["school"].emis }}</td>
+            <td>{{ row["school"].name }}</td>
+            <td>{{ row["circuit"] }}</td>
+            <td>{{ row["submitted_registers_count"] }}</td>
+            <td>{{ row["needed_registers_count"] }}</td>
+            <td>{{ row["not_submitted"] }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

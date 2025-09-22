@@ -1,0 +1,86 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="container mt-4">
+  <h2>Edit School Register for {{ school.name }}</h2>
+
+    <a href="{{ url_for('register.school_registers',school_id=school.id) }}" class="btn btn-secondary mb-3">&larr; Back to School Registers</a>
+    <button id="set-all-btn"
+          class="btn btn-primary mb-3 ms-2">
+    Set All Statuses
+  </button>
+
+  <h3>Register for {{ week.label }}</h3>
+  <form method="POST">
+    {% if school and week %}
+    <!-- Attendance Table -->
+    <div class="table-responsive mt-4">
+      <table class="table table-bordered">
+        <thead class="table-light">
+          <tr>
+            <th>ID Number</th>
+            <th>Employee</th>
+            {% for day_offset in range(5) %}
+              {% set day_date = week.start_date + day_offset|timedelta %}
+              <th>{{ day_date.strftime("%A") }}<br>{{ day_date.strftime("%d %b") }}</th>
+            {% endfor %}
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for emp in school.employees|sort(attribute="surname") %}
+          <tr>
+            <th> {{ emp.id_number }}</th>
+            <td>{{ emp.surname }}, {{ emp.firstname }}</td>
+            {% for day_offset in range(5) %}
+              {% set day_date = week.start_date + day_offset|timedelta %}
+              {% set day_name = day_date.strftime("%A") %}
+              {% set enabled = True %}
+              
+
+              {% if emp.end_date and emp.end_date < day_date %}
+                {% set default_status = 'not active' %}
+                {% set enabled = False %}
+              {% elif emp.start_date > day_date %}
+                {% set default_status = 'not active' %}
+                {% set enabled = False %}
+              {% else %}
+                {% set default_status = 'present' %}
+              {% endif %}
+
+              {% set entry = entries_dict.get((emp.id,day_name), {}) %}
+              {% if entry %}
+                {% set current_status = entry.status %}
+              {% else %}
+                {% set current_status = default_status %}
+              {% endif %}
+
+              <td>
+                <select class="status-select px-1 py-0.5 rounded text-xs form-select form-select-sm"
+                        name="status_{{ emp.id }}_{{ day_name }}" {% if not enabled %}disabled{% endif %}>
+                    {% for status in statuses %}
+                      <option value="{{ status }}"
+                        {% if status == current_status %}selected{% endif %}>
+                        {{ status }}
+                      </option>
+                    {% endfor %}
+                </select>
+              </td>
+            {% endfor %}
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+      <div class="alert alert-warning">
+        <strong>Error</strong>: School or Week information is missing. Please go back and select a school and week.
+      </div>
+    {% endif %}
+    <div class="mb-2 pt-2">
+      <label for="notes" class="form-label">Notes (optional):</label>
+      <textarea class="form-control" id="notes" name="notes" rows="3">{{ register.notes if register else '' }}</textarea>
+    </div>
+    <button type="submit" class="btn btn-success">Save Changes</button>
+  </form>
+</div> 
+{% endblock %}

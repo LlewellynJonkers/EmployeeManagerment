@@ -1,0 +1,77 @@
+{% extends "layout.html" %}
+{% block content %}
+<h2>Registers</h2>
+
+<a role="button" href="{{ url_for('register.add') }}">Add new register</a>
+
+<table>
+    <thead>
+        <tr>
+            <th>
+                Week
+            </th>
+            <th>
+                Week start date
+            </th>
+            <th>
+                Week end date
+            </th>
+            <th>
+                Attendents
+            </th>
+            <th>
+                Leaves
+            </th>
+            <th>
+                Absents
+            </th>
+            <th>
+                Notes
+            </th>
+            <th>
+
+            </th>
+            <th>
+
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for s in schools %}
+            <tr>
+                <td>
+                    {{s.emis}}
+                </td>
+                <td>
+                    {{s.name}}
+                </td>
+                <td>
+                    {{s.payment_source}}
+                </td>
+                <td>
+                    {{s.circuit}}
+                </td>
+                <td>
+                    {{s.quintile}}
+                </td>
+                <td>
+                    {{s.allocation}}
+                </td>
+                <td>
+                    {{s.district.name}}
+                </td>
+                <td>
+                    {{s.district.province.name}}
+                </td>
+                <td>
+                    <a href="{{ url_for('register.school_registers',school_id=s.id)}}">Registers</a>
+                </td>
+                <td>
+                    <a href="{{ url_for('school.edit,school_id=s.id')}}">Edit</a>
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

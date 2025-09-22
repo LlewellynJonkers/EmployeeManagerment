@@ -1,0 +1,44 @@
+{% extends "layout.html" %}
+
+{% block title %}Schools{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between mb-3">
+  <h2 class="page-title">Schools</h2>
+  <!--<a href="{{ url_for('upload.upload_schools')}}" class="btn btn-primary">Bulk insert Schools</a>-->
+</div>
+
+<div class="card">
+  <div class="table-responsive">
+    <table class="table table-vcenter card-table">
+      <thead>
+        <tr>
+          <th>EMIS</th>
+          <th>Name</th>
+          <th>Registers</th>
+          <th>District</th>
+          <th>Province</th>
+          <th class="w-1">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for school in schools %}
+        <tr>
+          <td><a href="{{ url_for('school.details', emis=school.emis) }}">{{ school.emis }}</a></td>
+          <td><a href="{{ url_for('school.details', emis=school.emis) }}" >{{ school.name }}</a></td>
+          <td>{{ school.registers|length }}</td>
+          <td>{{ school.district.name if school.district else '' }}</td>
+          <td>{{ school.district.province.name if school.district.province else '' }}</td>
+          <td>
+            <div class="btn-list flex-nowrap">
+              <a href="#" class="btn btn-sm btn-outline-secondary">Edit</a>
+              <a href="{{ url_for('register.school_registers', school_id=school.id) }}" class="btn btn-sm btn-outline-info">Registers</a>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

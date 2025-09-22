@@ -1,0 +1,44 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="container mt-4">
+  <h2>School register summary</h2>
+  <div>
+    <a href="{{ url_for('register.school_registers',school_id=school.id) }}" class="btn btn-secondary mb-3">&larr; Back to School Registers</a>
+  </div>
+  <div>
+    <form class="form mb-3" method="GET">
+      <div class="form-group">
+        <label for="start_date">Select Week Starting:</label>
+        <input type="date" id="start_date" name="start_date" class="form-control" value="{{ start_date }}">
+      </div>
+      <div class="form-group mt-2">
+        <label for="end_date">Select Week Ending:</label>
+        <input type="date" id="end_date" name="end_date" class="form-control" value="{{ end_date }}">  
+      </div>
+        <button type="submit" class="btn btn-primary btn-sm mt-2">Filter</button>
+    </form>
+  </div>
+  <div>
+    <table class="table table-bordered">
+      <thead class="table-light">
+        <tr>
+            <th>Employee</th>
+            {% for status in statuses %}
+                <th>{{ status|capitalize }}</th>
+            {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for emp in employees %}
+        <tr>
+          <td>{{ emp.surname }}, {{ emp.firstname }}</td>
+            {% for status in statuses %}
+                <td>{{ summary[emp.id].get(status, 0) }}</td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}
+  

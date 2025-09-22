@@ -1,0 +1,110 @@
+{% extends "layout.html" %}
+
+{% block title %}{{ school.name }} Registers{% endblock %}
+
+{% block content %}
+<h2 class="page-title"><a href="{{ url_for('school.details',emis=school.emis)}}">{{ school.name }} - Registers</a></h2>
+<hr class="hr"/>
+
+<div class="d-flex justify-content-between mb-3">
+    <a href="{{ url_for('school.details', emis=school.emis) }}" class="btn btn-secondary btn-sm">
+        ← Back to School Details
+    </a>
+    <a href="{{ url_for('register.register_report') }}" class="btn btn-primary btn-sm">
+        Report
+    </a>
+</div>
+
+<div class="card card-sm">
+  <div class="table-responsive">
+    <table class="table table-vcenter table-sm card-table">
+        <thead>
+            <tr>
+                <th>
+                    Week Label
+                </th>
+                <th>
+                    Start Date
+                </th>
+                <th>
+                    End Date
+                </th>
+                <th>
+                    Attendents
+                </th>
+                <th>
+                    Leaves (all)
+                </th>
+                <th>
+                    Absents
+                </th>
+                <th>
+                    Notes
+                </th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for week in workweeks %}
+            {% set register = school.get_register(week) %}
+            <!-- {{ register }} -->
+            {% if register %}
+            
+                <tr>
+                     <td>{{ week.label }}</td>
+                        <td>{{ week.start_date.strftime("%d %B %Y") }}</td>
+                        <td>{{ week.end_date.strftime("%d %B %Y") }}</td>
+                    <td>
+                        {{register.get_status_count("present")}}
+                    </td>
+                    <td>
+                        {{
+                            register.get_status_count("sick leave") + 
+                            register.get_status_count("annual leave")+
+                            register.get_status_count("school closed")+
+                            register.get_status_count("special leave")+
+                            register.get_status_count("other leave") +
+                            register.get_status_count("family resp leave")+
+                            register.get_status_count("pre-natal leave")+
+                            register.get_status_count("recess or holiday")+
+                            register.get_status_count("parternal leave")+
+                            register.get_status_count("maternity leave")
+                        }}                 
+                    </td>
+                    <td>
+                        {{register.get_status_count("absent")}}
+                    </td>
+                    <td class="px-2 py-1">
+                        <span class="inline-block w-5 overflow-hidden whitespace-nowrap truncate" style="max-width: 80px;  ">
+                            {{register.notes}}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="btn-list flex-nowrap">
+                            <a href="{{ url_for('register.edit_school_register',register_id = register.id) }}" class="btn btn-sm btn-outline-primary">Edit</a>
+                            <a href="{{ url_for('register.view_register', register_id=register.id) }}" class="btn btn-sm btn-outline-secondary">View</a>
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                    <tr>
+                        <td>{{ week.label }}</td>
+                        <td>{{ week.start_date.strftime("%d %B %Y") }}</td>
+                        <td>{{ week.end_date.strftime("%d %B %Y") }}</td>
+                        <td colspan="4">
+                            <span class="text-warning">The register for this week has not been recorded</span>
+                        </td>
+                        <td>
+                            <div class="btn-list flex-nowrap">
+                                <a href="{{ url_for('register.add_school_register', school_id=school.id, week_id=week.id) }}" class="btn btn-sm btn-outline-success">Add</a>
+                            </div>
+                        </td>
+                    </tr>
+                {% endif %}
+            {% endfor %}
+        </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}

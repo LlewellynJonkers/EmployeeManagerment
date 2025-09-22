@@ -1,0 +1,40 @@
+{% extends "layout.html" %}
+
+{% block title %}View Register{% endblock %}
+
+{% block content %}
+<h2>Register Details</h2>
+<p><strong>School:</strong> <a href="{{ url_for('school.details', emis=school.emis) }}">{{ school.name }}</a> ({{ school.emis }})</p>
+<p><strong>Week:</strong> {{ register.work_week.start_date.strftime("%d %b %Y") }} - {{ register.work_week.end_date.strftime("%d %b %Y") }}</p>
+<p><strong>Notes:</strong> <br/>{{ register.notes if register.notes else 'None' }}</p>
+<div>
+    <a href="#" class="btn btn-sm btn-primary">Edit Register</a>
+    <a href="{{ url_for('register.school_registers', school_id=school.id) }}" class="btn btn-sm btn-secondary">Back to Registers</a>
+</div>
+<div class="table-responsive mt-4">
+    <table class="table table-bordered">
+        <thead class="table-light">
+            <tr>
+                <th>ID Number</th>
+                <th>Employee</th>
+                {% for day_offset in range(5) %}
+                {% set day_date = register.work_week.start_date + day_offset|timedelta %}
+                <th>{{ day_date.strftime("%A") }}<br>{{ day_date.strftime("%d %b") }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for emp in school.employees|sort(attribute="surname") %}
+            <tr>
+                <th> {{ emp.id_number }}</th>
+                <td>{{ emp.surname }}, {{ emp.firstname }}</td>
+                {% for entry in entries_by_employee.get(emp.id,[]) %}
+                {% set status = entry.status if entry else None %}
+                <td>{{ status if status else 'N/A' }}</td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

@@ -1,0 +1,167 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="container-xl">
+
+  <!-- Page Header -->
+  <div class="page-header d-print-none">
+    <div class="row align-items-center">
+      <div class="col">
+        <h2 class="page-title">
+          School Details
+        </h2>
+        <div class="text-muted mt-1">{{ school.name }}</div>
+      </div>
+      <div class="col-auto ms-auto">
+        <a href="{{ url_for('school.index') }}" class="btn btn-secondary btn-sm">
+          Back to Schools
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- School Info Cards -->
+  <div class="row row-cards mt-3">
+    <div class="col-sm-6 col-lg-4">
+      <div class="card card-sm">
+        <div class="card-body">
+          <div class="h4 mb-0">{{ school.emis }}</div>
+          <div class="text-muted">EMIS Number</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-sm-6 col-lg-4">
+      <div class="card card-sm">
+        <div class="card-body">
+          <div class="h4 mb-0">{{ school.payment_source }}</div>
+          <div class="text-muted">Payment Source</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-sm-6 col-lg-4">
+      <div class="card card-sm">
+        <div class="card-body">
+          <div class="h4 mb-0">{{ school.circuit }}</div>
+          <div class="text-muted">Circuit</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-sm-6 col-lg-4">
+      <div class="card card-sm">
+        <div class="card-body">
+          <div class="h4 mb-0">{{ school.quintile }}</div>
+          <div class="text-muted">Quintile</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-sm-6 col-lg-4">
+      <div class="card card-sm">
+        <div class="card-body">
+          <div class="h4 mb-0">{{ school.allocation }}</div>
+          <div class="text-muted">Allocation</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-sm-6 col-lg-4">
+      <div class="card card-sm">
+        <div class="card-body">
+          <div class="h4 mb-0">{{ school.district.name }}</div>
+          <div class="text-muted">District</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-sm-6 col-lg-4">
+      <div class="card card-sm">
+        <div class="card-body">
+          <div class="h4 mb-0">{{ school.employees|selectattr('is_active')|list|length }}</div>
+          <div class="text-muted">Active Employees</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Attendance Summary -->
+  <div class="row mt-4">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Attendance Summary</h3>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-sm card-table table-striped">
+            <thead>
+              <tr>
+                <th>Attendance Type</th>
+                <th>Total Count</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for status, count in attendance_summary.items() %}
+              <tr>
+                <td>{{ status }}</td>
+                <td>{{ count }}</td>
+              </tr>
+              {% else %}
+              <tr>
+                <td colspan="2" class="text-center text-muted">No attendance data available</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mt-3">
+    <a href="{{ url_for('register.school_registers', school_id=school.id) }}" 
+       class="btn btn-primary btn-sm">
+      📋 View Registers
+    </a>
+    <a href="{{ url_for('register.school_register_summary', emis=school.emis) }}" 
+       class="btn btn-secondary btn-sm">
+      📋 View Register Summary
+    </a>
+  </div>
+
+
+
+  <hr>
+
+  <h4>Employees</h4>
+  <table class="table table-sm table-hover">
+    <thead class="table-light">
+      <tr>
+        <th>Name</th>
+        <th>Surname</th>
+        <th>Position</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for emp in school.employees %}
+      <tr>
+        <td>{{ emp.firstname }}</td>
+        <td>{{ emp.surname }}</td>
+        <td>{{ emp.position }}</td>
+        <td>
+          {% if emp.contract_status == "Active" %}
+            <span class="badge bg-success">Active</span>
+          {% else %}
+            <span class="badge bg-secondary">Inactive</span>
+          {% endif %}
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="4">No employees found</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+</div>
+{% endblock %}
