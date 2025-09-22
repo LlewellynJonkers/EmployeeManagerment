@@ -1,5 +1,6 @@
 import os
 from datetime import datetime, date
+from dateutil.relativedelta import relativedelta
 import pandas as pd
 from flask import Blueprint, request, redirect, url_for, flash, render_template
 from flask_login import login_required
@@ -144,17 +145,28 @@ def school_register_summary(emis):
     end_date = request.args.get("end_date")
     print(f"Start date: {start_date}, End date: {end_date}")
 
+    today = date.today()
+
+    # Previous month's 21st
+    prev_month_21 = (today.replace(day=1) - relativedelta(days=1)).replace(day=21)
+
+    # Current month's 20th
+    current_month_20 = today.replace(day=20)
+
     if not school:
         flash("School not found","danger")
         return redirect(url_for("school.index"))
     
-    start_date = datetime.strptime(start_date,"%Y-%m-%d").date() if start_date else datetime.strptime("2025-06-02","%Y-%m-%d").date()
-    end_date = datetime.strptime(end_date,"%Y-%m-%d").date() if end_date else datetime.today().date()    
+    start_date = datetime.strptime(start_date,"%Y-%m-%d").date() if start_date else prev_month_21
+    end_date = datetime.strptime(end_date,"%Y-%m-%d").date() if end_date else current_month_20 
     employe_entries = {}
     for emp in school.employees:
         employe_entries[emp.id] = [entry for entry in emp.entries if start_date <= entry.date <= end_date]
     
     summary = {}
+    registers = Register.query.filter_by(school_id=school.id).all()
+    registers = [reg for reg in registers if start_date <= reg.work_week.end_date and reg.work_week.start_date <= end_date]
+    notes = {reg.work_week.label: reg.notes for reg in registers if reg.notes}
     for status in entry_statuses:
         for emp_id, entries in employe_entries.items():
             count = len([entry for entry in entries if entry.status == status])
@@ -168,7 +180,8 @@ def school_register_summary(emis):
                            start_date=start_date,
                            end_date=end_date,
                            employees=school.employees, 
-                           statuses=entry_statuses)
+                           statuses=entry_statuses,
+                           notes=notes)
 
 @register_bp.route("/report")
 @login_required
@@ -187,9 +200,10 @@ def register_report():
         submitted_registers = Register.query.filter_by(school_id=school.id).all()
         submitted_registers = [reg for reg in submitted_registers if start_week <= reg.week_id <= end_week]
         row["submitted_registers_count"] = len(submitted_registers)
-        row["needed_registers_count"] = len(WorkWeek.query.all())-len(submitted_registers)
+        weeks = [week for week in WorkWeek.query.all() if start_week <= week.id <= end_week]
+        row["needed_registers_count"] = len(weeks)-len(submitted_registers)
         not_submitted = []
-        for week in WorkWeek.query.all():
+        for week in weeks:
             if not any(reg.week_id == week.id for reg in submitted_registers):
                 not_submitted.append(week)
         row["not_submitted"] = ", ".join(not_submitted[i].end_date.strftime("%d-%b") for i in range(len(not_submitted)))
@@ -200,4 +214,7 @@ def register_report():
                            headers=headers,
                            end_week=end_week,
                            weeks=WorkWeek.query.all())
+
+
+
 

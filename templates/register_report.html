@@ -1,4 +1,15 @@
 {% extends "layout.html" %}
+
+{% block head %}
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/jquery.dataTables.min.css">
+  <style>
+    #reportTable tbody tr:nth-child(odd)  { background-color: #f9f9f9; }
+/* White for even rows */
+    #reportTable tbody tr:nth-child(even) { background-color: #ffffff; }
+  </style>
+{% endblock %}
+
+{% block title %}Register Report{% endblock %}
 {% block content %}
 <div class="container mt-4">
   <h2>Register Report</h2>
@@ -25,11 +36,11 @@
         </select>
       </div>
         <button type="submit" class="btn btn-primary btn-sm mt-2">Generate Report</button> 
-
+        <buttun role="button" id="download-btn" class="btn btn-secondary btn-sm mt-2">Download Report</buttun>
     </form>
   </div>
   <div>
-    <table class="table table-bordered table-sm">
+    <table class="table table-bordered table-sm" id="reportTable">
       <thead class="table-light">
         <tr>
           {% for header in headers %}
@@ -52,4 +63,26 @@
     </table>
   </div>
 </div>
+{% endblock %}
+{% block scripts %}
+  <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+  <script>
+    document.getElementById('download-btn').addEventListener('click', function() {
+      var table = document.querySelector('#reportTable');
+      var workbook = XLSX.utils.table_to_book(table, {sheet: "Report"});
+      var d = new Date();
+      var pad = n => n.toString().padStart(2, '0');
+      var dateTime = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}_`
+                      + `${pad(d.getHours())}-${pad(d.getMinutes())}-${pad(d.getSeconds())}`;
+
+      var filename = `register_report_${dateTime}.xlsx`;
+      XLSX.writeFile(workbook, filename);
+    });
+
+    $(document).ready(function() {
+        $('#reportTable').DataTable({paging: false, searching: false, info: false});
+    });
+  </script>
 {% endblock %}

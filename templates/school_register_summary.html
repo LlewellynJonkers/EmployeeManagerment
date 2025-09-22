@@ -3,7 +3,7 @@
 <div class="container mt-4">
   <h2>School register summary</h2>
   <div>
-    <a href="{{ url_for('register.school_registers',school_id=school.id) }}" class="btn btn-secondary mb-3">&larr; Back to School Registers</a>
+    <a href="{{ url_for('school.details',emis=school.emis) }}" class="btn btn-secondary btn-sm mb-3">&larr; Back to School Details</a>
   </div>
   <div>
     <form class="form mb-3" method="GET">
@@ -19,7 +19,7 @@
     </form>
   </div>
   <div>
-    <table class="table table-bordered">
+    <table class="table table-bordered" summary="Employee Register Summary" id="summaryTable">
       <thead class="table-light">
         <tr>
             <th>Employee</th>
@@ -31,7 +31,7 @@
       <tbody>
         {% for emp in employees %}
         <tr>
-          <td>{{ emp.surname }}, {{ emp.firstname }}</td>
+          <td><a href="{{ url_for('employee.summary', employee_id=emp.id)}}">{{ emp.surname }}, {{ emp.firstname }}</a></td>
             {% for status in statuses %}
                 <td>{{ summary[emp.id].get(status, 0) }}</td>
             {% endfor %}
@@ -39,6 +39,50 @@
         {% endfor %}
       </tbody>
     </table>
+    <div>
+        <h5>Notes</h5>
+        {% if notes %}
+            <ul>
+                {% for week, note in notes.items() %}
+                    <li><strong>{{ week }}:</strong> {{ note }}</li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No notes available for the selected period.</p>
+        {% endif %}
   </div>
+{% endblock %}
+
+{% block scripts %}
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const table = document.getElementById('summaryTable');
+    const rows  = table.tBodies[0].rows;
+    const cols  = table.tHead.rows[0].cells.length;
+
+    // Walk columns right-to-left so hiding doesn’t shift indexes
+    for (let c = cols - 1; c >= 0; c--) {
+      let allZero = true;
+
+      for (let r = 0; r < rows.length; r++) {
+        const text = rows[r].cells[c].innerText.trim();
+        // test for numeric 0 (ignore blanks and non-numbers as "not zero")
+        if (text !== '0' && text !== '0.0' && text !== '0.00') {
+          allZero = false;
+          break;
+        }
+      }
+
+      if (allZero) {
+        // hide the header cell
+        table.tHead.rows[0].cells[c].style.display = 'none';
+        // hide each body cell in that column
+        for (let r = 0; r < rows.length; r++) {
+          rows[r].cells[c].style.display = 'none';
+        }
+      }
+    }
+  });
+  </script>
 {% endblock %}
   

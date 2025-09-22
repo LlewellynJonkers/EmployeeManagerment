@@ -10,7 +10,8 @@ from models import db, User,District,Province, WorkWeek
 from datetime import date, timedelta
 import os
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='lib', static_url_path='/lib')
+#app = Flask(__name__)
 app.secret_key = "pyeibeeipixleyusermanagementsecretkey"  # Change in production
 
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///user_management.db"
