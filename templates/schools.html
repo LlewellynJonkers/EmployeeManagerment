@@ -8,7 +8,7 @@
   <!--<a href="{{ url_for('upload.upload_schools')}}" class="btn btn-primary">Bulk insert Schools</a>-->
 </div>
 
-<div class="d-flex justify-content-between mb-3"></div>
+<div class="d-flex justify-content-between"></div>
   <a href="{{ url_for('register.register_report') }}" class="btn btn-primary btn-sm">
     Report
   </a>
@@ -16,14 +16,12 @@
 
 <div class="card">
   <div class="table-responsive">
-    <table class="table table-vcenter card-table">
+    <table class="table table-vcenter card-table" id="schoolsTable">
       <thead>
         <tr>
           <th>EMIS</th>
           <th>Name</th>
           <th>Registers</th>
-          <th>District</th>
-          <th>Province</th>
           <th class="w-1">Actions</th>
         </tr>
       </thead>
@@ -33,8 +31,6 @@
           <td><a href="{{ url_for('school.details', emis=school.emis) }}">{{ school.emis }}</a></td>
           <td><a href="{{ url_for('school.details', emis=school.emis) }}" >{{ school.name }}</a></td>
           <td>{{ school.registers|length }}</td>
-          <td>{{ school.district.name if school.district else '' }}</td>
-          <td>{{ school.district.province.name if school.district.province else '' }}</td>
           <td>
             <div class="btn-list flex-nowrap">
               <a href="#" class="btn btn-sm btn-outline-secondary">Edit</a>
@@ -47,4 +43,32 @@
     </table>
   </div>
 </div>
+{% endblock %}
+{% block scripts %}
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    let len = {{ schools|length }};
+    console.log(len);
+    let table = $('#schoolsTable').DataTable({
+      "pageLength": 100,
+      "lengthMenu": [ [10, 25, 50,100, -1], [10, 25, 50,100, "All"] ],
+      "order": [[1, "asc"]], // Order by second column (index 1) ascending by default
+      "columnDefs": [
+        { "orderable": false, "targets": [-1] } // Disable sorting on the last column (Actions)
+      ]
+    });
+    // Add custom classes to the search bar and set placeholder
+    var $searchInput = $('.dataTables_filter input[type="search"]');
+    $searchInput.addClass('form-control form-control-sm').attr('placeholder', 'Search');
+    // Remove the 'Search' label text
+    $('.dataTables_filter label').contents().filter(function() {
+      return this.nodeType === 3 && this.textContent.match(/search/i);
+    }).remove();
+    // Move the input into a new centered div
+    var $filter = $('.dataTables_filter');
+    var $centerDiv = $('<div class="w-100 d-flex justify-content-center"></div>');
+    $searchInput.appendTo($centerDiv);
+    $filter.empty().append($centerDiv);
+  });
+  </script>
 {% endblock %}

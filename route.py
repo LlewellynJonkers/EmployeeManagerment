@@ -4,7 +4,7 @@ import pandas as pd
 from flask import Blueprint, request, redirect, url_for, flash, render_template
 from flask_login import  login_required
 from werkzeug.utils import secure_filename
-from models import db, School, Employee, District
+from models import db, School, Employee, District, File,BulkUploadError,BulkUploadLog
 from helpers import get_or_create
 
 route_bp = Blueprint("upload", __name__, url_prefix="/upload")
@@ -27,10 +27,17 @@ def upload_schools():
             filepath = os.path.join(UPLOAD_FOLDER, filename)
             os.makedirs(UPLOAD_FOLDER, exist_ok=True)
             file.save(filepath)
+            File_record = File(
+                filename=filename,
+                file_path=filepath,
+                description="Bulk upload of schools",
+                file_type="school_data")
+            db.session.add(File_record)
+            db.session.commit()
 
             # Read Excel file
             df = pd.read_excel(filepath)
-
+            exceptions = []
             # Expected columns: emis, name, payment_source, circuit, quintile, allocation, district_id
             for _, row in df.iterrows():
                 try:
@@ -62,11 +69,30 @@ def upload_schools():
                         "district_id":district_id
                     },emis=emis)
                 except Exception as e:
+                    exceptions.append({row.name: e})
                     print(f"Error processing row: {row}. Error: {e}")
                     flash(f"Error processing row: {row}. Error: {e}", "danger")
+            
+
 
 
             db.session.commit()
+            log = BulkUploadLog(
+                file_id=File_record.id,
+                upload_type="school_data",
+                status="completed" if not exceptions else "completed_with_errors")
+            db.session.add(log)
+            db.session.commit()
+            for ex in exceptions:
+                for k,v in ex.items():
+                    print(f"Row: {k} Error: {v}")
+                    error_entry = BulkUploadError(
+                        log_id=log.id,
+                        row_number=int(k.name)+5,
+                        message=str(v))
+                    db.session.add(error_entry)
+            db.session.commit()
+            
             flash("Schools uploaded successfully!", "success")
             return redirect(url_for("school.index"))
 
@@ -79,16 +105,30 @@ def upload_employees():
         file = request.files["file"]
 
         if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
+
+            original_name = secure_filename(file.filename)
+            now_str = datetime.now().strftime('%Y%m%d_%H%M%S')
+            filename = f"SC03_{now_str}_{original_name}"
             filepath = os.path.join(UPLOAD_FOLDER, filename)
             os.makedirs(UPLOAD_FOLDER, exist_ok=True)
             file.save(filepath)
+            # Save file record
+            File_record = File(
+                filename=filename,
+                file_path=filepath,
+                description="Upload of SC03 Employee data on "+ now_str,
+                file_type="employee_data")
+            db.session.add(File_record)
+            db.session.commit()
+
+            
 
             # Read Excel file
             df = pd.read_excel(filepath,skiprows=5,dtype={"ID number":str})
 
             # Expected columns: emis, name, payment_source, circuit, quintile, allocation, district_id
             errors = []
+            exceptions = []
             for _, row in df.iterrows():
                 try:
                     schoolname = str(row["School"]).strip()
@@ -115,9 +155,30 @@ def upload_employees():
                         db.session.commit()
                 except Exception as e:
                     errors.append(f"Error processing row: {row}. Error: {e}")
+                    exceptions.append({row.name: e})
+
                     
             db.session.commit()
+
             flash("Schools uploaded successfully!", "success")
+            log = BulkUploadLog(
+                file_id=File_record.id,
+                upload_type="Employee_data",
+                status="completed" if not exceptions else "completed_with_errors")
+            db.session.add(log)
+            db.session.commit()
+
+            for ex in exceptions:
+                for k,v in ex.items():
+                    print(f"Row: {k} Error: {v}")
+                    error_entry = BulkUploadError(
+                        log_id=log.id,
+                        row_number=int(k)+5,
+                        message=str(v))
+                    db.session.add(error_entry)
+            db.session.commit()
+
+
             if errors:
                 for error in errors:
                     flash(error, "danger")

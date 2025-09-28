@@ -1,4 +1,5 @@
 from flask import Flask, redirect, url_for,render_template
+from flask_migrate import Migrate
 from flask_login import LoginManager, current_user, login_required
 from auth import auth_bp
 from employee import employee_bp
@@ -11,6 +12,7 @@ from datetime import date, timedelta
 import os
 
 app = Flask(__name__, static_folder='lib', static_url_path='/lib')
+migrate = Migrate(app, db)
 #app = Flask(__name__)
 app.secret_key = "pyeibeeipixleyusermanagementsecretkey"  # Change in production
 

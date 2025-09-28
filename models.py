@@ -1,4 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import PrimaryKeyConstraint
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -167,3 +168,40 @@ class WorkWeek(db.Model):
     label = db.Column(db.String(20), unique=True, nullable=False)
 
     registers = db.relationship("Register", back_populates="work_week")
+
+
+class File(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    filename = db.Column(db.String(200), nullable=False)
+    upload_date = db.Column(db.DateTime, default=db.func.current_timestamp())
+    description = db.Column(db.String(255), nullable=True)
+    file_type = db.Column(db.String(50), nullable=True, default="school_register")
+    file_path = db.Column(db.String(500), nullable=False)
+
+class BulkUploadLog(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    upload_date = db.Column(db.DateTime, default=db.func.current_timestamp())
+    file_id = db.Column(db.Integer, db.ForeignKey('file.id'), nullable=False)
+    status = db.Column(db.String(50), nullable=False)
+    upload_type = db.Column(db.String(50), nullable=False)
+    message = db.Column(db.String(500), nullable=True)
+
+class BulkUploadError(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    log_id = db.Column(db.Integer, db.ForeignKey('bulk_upload_log.id'), nullable=False)
+    row_number = db.Column(db.Integer, nullable=False)
+    message = db.Column(db.String(500), nullable=False)
+
+    log = db.relationship('BulkUploadLog', backref=db.backref('errors', lazy=True))
+
+class RegisterFile(db.Model):
+    __tablename__ = "register_file"
+
+    register_id = db.Column(db.Integer, db.ForeignKey("registers.id"), primary_key=True)
+    file_id = db.Column(db.Integer, db.ForeignKey("file.id"), primary_key=True)
+    
+    register = db.relationship("Register")
+    file = db.relationship("File")
+    __table_args__ = (
+        db.PrimaryKeyConstraint("register_id", "file_id", name="pk_register_file"),
+    )
