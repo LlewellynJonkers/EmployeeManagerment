@@ -1,0 +1,19 @@
+<!-- partials/view_file_modal.html -->
+
+<button type="button" class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#viewFileModal{{ file_id }}">View File</button>
+<div class="modal fade" id="viewFileModal{{ file_id }}" tabindex="-1" aria-labelledby="viewFileLabel{{ file_id }}" aria-hidden="true">
+  <div class="modal-dialog modal-fullscreen">
+    <div class="modal-content h-100">
+      <div class="modal-header py-1 px-2 align-items-center" style="min-height:32px;">
+        <button type="button" class="btn-close ms-2" data-bs-dismiss="modal" aria-label="Close" style="width:1.5rem;height:1.5rem;"></button>
+      </div>
+      <div class="modal-body p-1 m-0 h-100 position-relative">
+        {% if file_id %}
+          <embed src="{{ url_for('download_file', file_id=file_id) }}?inline=1" type="application/pdf" style="width:100%;height:calc(100vh - 80px);" />
+         {% else %}
+          <small>Preview not available. Please download the file.</small>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>

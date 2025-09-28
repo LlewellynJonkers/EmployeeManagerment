@@ -1,4 +1,4 @@
-from flask import Flask, redirect, url_for,render_template
+from flask import Flask, redirect, url_for,render_template, send_file, abort, request
 from flask_migrate import Migrate
 from flask_login import LoginManager, current_user, login_required
 from auth import auth_bp
@@ -7,7 +7,7 @@ from school import school_bp
 from route import route_bp
 from register import register_bp
 from helpers import get_or_create
-from models import db, User,District,Province, WorkWeek
+from models import db, User,District,Province, WorkWeek, File
 from datetime import date, timedelta
 import os
 
@@ -70,10 +70,19 @@ def set_defaults():
     loadweeks()
     return redirect(url_for("index"))
 
-@app.template_filter("timedelta")
-def timedelta_filter(value):
-    from datetime import timedelta
-    return timedelta(days=value)
+@app.route("/download/<int:file_id>")
+@login_required
+def download_file(file_id):
+    file_record = File.query.get_or_404(file_id)
+    if not os.path.exists(file_record.file_path):
+        abort(404)
+    as_attachment = not request.args.get('inline')
+    return send_file(file_record.file_path, as_attachment=as_attachment, download_name=file_record.filename)
+
+
+
+
+
 
 
 if __name__ == "__main__":

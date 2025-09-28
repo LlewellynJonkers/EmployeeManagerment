@@ -1,5 +1,4 @@
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import PrimaryKeyConstraint
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -120,6 +119,9 @@ class Register(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     school_id = db.Column(db.Integer, db.ForeignKey("school.id"), nullable=False)
     week_id = db.Column(db.Integer, db.ForeignKey("work_weeks.id"), nullable=False)
+    file_id = db.Column(db.Integer, db.ForeignKey("file.id"), nullable = True)
+
+
 
 
 
@@ -139,6 +141,11 @@ class Register(db.Model):
     
     def get_status_count(self,status):
         return len([entry for entry in self.entries if entry.status == status])
+    
+    def get_file(self):
+        if self.file_id:
+            return File.query.filter_by(id=self.file_id).first()
+        return None
 
 
 class RegisterEntry(db.Model):
@@ -153,6 +160,7 @@ class RegisterEntry(db.Model):
 
     register = db.relationship("Register", back_populates="entries")
     employee = db.relationship("Employee", back_populates="entries")
+
 
     __table_args__ = (
         db.UniqueConstraint("register_id", "day_of_week", "employee_id", name="uq_register_day"),
@@ -199,9 +207,6 @@ class RegisterFile(db.Model):
 
     register_id = db.Column(db.Integer, db.ForeignKey("registers.id"), primary_key=True)
     file_id = db.Column(db.Integer, db.ForeignKey("file.id"), primary_key=True)
-    
+
     register = db.relationship("Register")
     file = db.relationship("File")
-    __table_args__ = (
-        db.PrimaryKeyConstraint("register_id", "file_id", name="pk_register_file"),
-    )

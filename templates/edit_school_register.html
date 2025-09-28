@@ -10,7 +10,7 @@
   </button>
 
   <h3>Register for {{ week.label }}</h3>
-  <form method="POST">
+  <form method="POST" action="" enctype="multipart/form-data">
     {% if school and week %}
     <!-- Attendance Table -->
     <div class="table-responsive mt-4">
@@ -80,6 +80,13 @@
       <label for="notes" class="form-label">Notes (optional):</label>
       <textarea class="form-control" id="notes" name="notes" rows="3">{{ register.notes if register else '' }}</textarea>
     </div>
+    <div class="mb-2">
+      {% set file = register.get_file() if register else None %}
+      {% if file %}
+      <a href="{{ url_for('download_file', file_id=register.file.id) }}" class="btn btn-info mb-2">Download Current Register</a>
+      {% endif %}
+      <label for="file" class="form-label">Upload File (optional):</label>
+      <input type="file" id="file" name="file" class="form-control form-control-sm">
     <button type="submit" class="btn btn-success">Save Changes</button>
   </form>
 </div> 

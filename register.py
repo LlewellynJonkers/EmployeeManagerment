@@ -5,7 +5,7 @@ import pandas as pd
 from flask import Blueprint, request, redirect, url_for, flash, render_template
 from flask_login import login_required
 from werkzeug.utils import secure_filename
-from models import db, School, Employee, District,WorkWeek,Register,RegisterEntry
+from models import db, School, Employee, District,WorkWeek,Register,RegisterEntry,File,RegisterFile
 from helpers import get_or_create, entry_statuses
 
 register_bp = Blueprint("register",__name__,url_prefix="/registers")
@@ -56,6 +56,25 @@ def add_school_register():
                                   employee_id=emp.id,register_id=register.id,day_of_week=day_name)
                 db.session.commit()
                 flash("Register saved successfully!","success") 
+                file = request.files["file"]
+                if file and file.filename:
+                    filename = secure_filename(f"{school.emis}_{week.label}_{datetime.now().strftime('%Y%m%d%H%M%S')}.{file.filename.rsplit('.',1)[1].lower()}")
+                    upload_folder = 'uploads/registers'
+                    if not os.path.exists(upload_folder):
+                        os.makedirs(upload_folder)
+                    file_path = os.path.join(upload_folder, filename)
+                    file.save(file_path)
+
+                    new_file = File(filename=filename, file_path=file_path, upload_date=datetime.now())
+                    db.session.add(new_file)
+                    db.session.commit()
+
+                    register.file_id = new_file.id
+                    db.session.commit()
+
+                    register_file = RegisterFile(register_id=register.id, file_id=new_file.id)
+                    db.session.add(register_file)
+                    db.session.commit()
 
                 return redirect(url_for("register.school_registers",school_id=school.id))
     return render_template("create_school_register.html",
@@ -102,6 +121,37 @@ def edit_school_register():
                             entry.status = status
             db.session.commit()
             flash("Register updated successfully!","success") 
+
+            file = request.files["file"]
+            if file and file.filename:
+                print(f"File found: {file.filename}")
+                filename = secure_filename(f"{school.emis}_{week.label}_{datetime.now().strftime('%Y%m%d%H%M%S')}.{file.filename.rsplit('.',1)[1].lower()}")
+                upload_folder = 'uploads\\registers'
+                if not os.path.exists(upload_folder):
+                    os.makedirs(upload_folder)
+                file_path = os.path.join(upload_folder, filename)
+                file.save(file_path)
+                print(f"File saved to {file_path}")
+
+                File_record = File(
+                    filename=filename,
+                    file_path=file_path,
+                    description=f"{school.name} register for {week.label}",
+                    file_type="register_file")
+                db.session.add(File_record)
+                db.session.commit()
+
+                
+                print(f"New file record created with file_id: {File_record.id}")
+
+                register.file_id = File_record.id
+                db.session.commit()
+
+                register_file = RegisterFile(register_id=register.id, file_id=File_record.id)
+                db.session.add(register_file)
+                db.session.commit()
+            else:
+                print("No file found or uploaded.")
 
             return redirect(url_for("register.school_registers",school_id=school.id))
     entries = RegisterEntry.query.filter_by(register_id=register.id).all() if register else []

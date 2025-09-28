@@ -10,7 +10,7 @@
   </button>
 
   <h3>Register for {{ week.label }}</h3>
-  <form method="POST">
+  <form method="POST" action="" enctype="multipart/form-data">
 
     {% if school and week %}
     <!-- Attendance Table -->
@@ -75,7 +75,9 @@
       <label class="form-label">Notes</label>
       <textarea name="notes" class="form-control form-control-sm" rows="2" placeholder="Add notes...">{{ existing_notes if existing_notes else '' }}</textarea>
     </div>
-
+    <div class="mb-2">
+      <label class="form-label">Upload File (optional)</label>
+      <input type="file" name="file" class="form-control form-control-sm">
     <button type="submit" class="btn btn-primary mt-3">Save Register</button>
   </form>
 </div>

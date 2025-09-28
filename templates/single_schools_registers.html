@@ -80,6 +80,12 @@
                         <div class="btn-list flex-nowrap">
                             <a href="{{ url_for('register.edit_school_register',register_id = register.id) }}" class="btn btn-sm btn-outline-primary">Edit</a>
                             <a href="{{ url_for('register.view_register', register_id=register.id) }}" class="btn btn-sm btn-outline-secondary">View</a>
+                            {% set file = register.get_file() %}
+                            {% if file %}
+                                <a href="{{ url_for('download_file', file_id=file.id) }}" class="btn btn-sm btn-outline-info">Download File</a>
+                                {% set file_id = file.id %}
+                                {% include 'partials/view_file_modal.html' %}
+                            {% endif %}
                         </div>
                     </td>
                 </tr>
