@@ -16,7 +16,7 @@ migrate = Migrate(app, db)
 #app = Flask(__name__)
 app.secret_key = "pyeibeeipixleyusermanagementsecretkey"  # Change in production
 
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///user_management.db"
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///user_management.db.bak"
 db.init_app(app)
 
 login_manager = LoginManager()
@@ -79,7 +79,10 @@ def download_file(file_id):
     as_attachment = not request.args.get('inline')
     return send_file(file_record.file_path, as_attachment=as_attachment, download_name=file_record.filename)
 
-
+@app.template_filter("timedelta")
+def timedelta_filter(value):
+    from datetime import timedelta
+    return timedelta(days=value)
 
 
 

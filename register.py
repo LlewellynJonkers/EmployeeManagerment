@@ -58,7 +58,7 @@ def add_school_register():
                 flash("Register saved successfully!","success") 
                 file = request.files["file"]
                 if file and file.filename:
-                    filename = secure_filename(f"{school.emis}_{week.label}_{datetime.now().strftime('%Y%m%d%H%M%S')}.{file.filename.rsplit('.',1)[1].lower()}")
+                    filename = secure_filename(f"{school.emis}-{school.name}_{week.label}_{datetime.now().strftime('%Y%m%d%H%M%S')}.{file.filename.rsplit('.',1)[1].lower()}")
                     upload_folder = 'uploads/registers'
                     if not os.path.exists(upload_folder):
                         os.makedirs(upload_folder)
@@ -211,7 +211,9 @@ def school_register_summary(emis):
     end_date = datetime.strptime(end_date,"%Y-%m-%d").date() if end_date else current_month_20 
     employe_entries = {}
     for emp in school.employees:
-        employe_entries[emp.id] = [entry for entry in emp.entries if start_date <= entry.date <= end_date]
+        con_end = min(end_date, (emp.end_date if emp.end_date else date.today()))
+        con_start = max(start_date, emp.start_date)
+        employe_entries[emp.id] = [entry for entry in emp.entries if con_start <= entry.date <= con_end]
     
     summary = {}
     registers = Register.query.filter_by(school_id=school.id).all()
@@ -219,6 +221,7 @@ def school_register_summary(emis):
     notes = {reg.work_week.label: reg.notes for reg in registers if reg.notes}
     for status in entry_statuses:
         for emp_id, entries in employe_entries.items():
+
             count = len([entry for entry in entries if entry.status == status])
             if emp_id not in summary:
                 summary[emp_id] = {}
