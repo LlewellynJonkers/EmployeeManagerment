@@ -1,0 +1,49 @@
+<button type="button" class="btn btn-sm btn-outline-secondary" title="View" data-bs-toggle="modal" data-bs-target="#viewFileRegisterModal{{ register.id }}">
+  <i class="bi bi-eye"></i>
+</button>
+
+<div class="modal fade" id="viewFileRegisterModal{{ register.id }}" tabindex="-1" aria-labelledby="viewFileRegisterModal{{ register.id }}" aria-hidden="true">
+  <div class="modal-dialog modal-fullscreen">
+    <div class="modal-content h-100">
+      <div class="modal-header py-1 px-2 align-items-center" style="min-height:32px;">
+        <button type="button" class="btn-close ms-2" data-bs-dismiss="modal" aria-label="Close" style="width:1.5rem;height:1.5rem;"></button>
+      </div>
+      <div class="modal-body p-1 m-0 h-100 position-relative">
+        {% if register %}
+        <div class="table-responsive mt-2">
+            <table class="table table-bordered table-sm table-striped table-nowrap" style="font-size: 0.85rem;">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="py-1 px-2">ID Number</th>
+                        <th class="py-1 px-2">Employee</th>
+                        {% for day_offset in range(5) %}
+                        {% set day_date = register.work_week.start_date + day_offset|timedelta %}
+                        <th class="py-1 px-2">{{ day_date.strftime("%A") }}<br>{{ day_date.strftime("%d %b") }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% set entries_by_employee = register.get_entries_grouped_by_employee() %}
+                    {% for emp in school.employees|sort(attribute="surname") %}
+                        {% if entries_by_employee.get(emp.id) %}
+                        <tr>
+                            <th class="py-1 px-2">{{ emp.id_number }}</th>
+                            <td class="py-1 px-2">{{ emp.surname }}, {{ emp.firstname }}</td>
+                            {% for entry in entries_by_employee.get(emp.id,[]) %}
+                                {% set status = entry.status if entry else None %}
+                                <td class="py-1 px-2">{{ status if status else 'N/A' }}</td>
+                            {% endfor %}
+                        </tr>
+                        {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <p><strong>Notes:</strong> <br/>{{ register.notes if register.notes else 'None' }}</p>
+        {% else %}
+        <p>No register data available.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>

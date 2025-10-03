@@ -1,0 +1,266 @@
+<button type="button" class="btn btn-sm btn-outline-warning" title="Upload File" data-bs-toggle="modal" data-bs-target="#uploadModal-{{ register.id }}">
+    <i class="bi bi-paperclip"></i>
+</button>
+<div class="modal fade" id="uploadModal-{{ register.id }}" tabindex="-1" aria-labelledby="uploadModalLabel-{{ register.id }}" aria-hidden="true">
+    <div class="modal-dialog">
+    <form method="POST" action="{{ url_for('register.upload_register_file', register_id=register.id) }}" enctype="multipart/form-data" id="uploadForm-{{ register.id }}">
+        <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title" id="uploadModalLabel-{{ register.id }}">Upload Register File</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+
+            <div id="dropzone-{{ register.id }}" class="border rounded p-3 text-center text-muted cursor-pointer" style="transition: background-color 0.2s;">
+                <p id="dropzone-text-{{ register.id }}" class="mb-1">Drag & drop a file here</p>
+                <p class="small text-muted">or click to browse</p>
+                <input type="file" id="registerFile-{{ register.id }}" name="register_file" class="d-none" required>
+            </div>
+
+            <!-- Progress Indicator -->
+            <div id="uploadProgress-{{ register.id }}" class="mt-3" style="display: none;">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <small class="text-muted" id="progressText-{{ register.id }}">Preparing upload...</small>
+                    <small class="text-muted" id="progressPercent-{{ register.id }}">0%</small>
+                </div>
+                <div class="progress" style="height: 6px;">
+                    <div id="progressBar-{{ register.id }}" class="progress-bar" role="progressbar" style="width: 0%; transition: width 0.3s ease;"></div>
+                </div>
+                <div class="mt-2">
+                    <small id="fileInfo-{{ register.id }}" class="text-muted"></small>
+                </div>
+            </div>
+
+            <!-- Upload Status Message -->
+            <div id="uploadStatus-{{ register.id }}" class="alert mt-3" style="display: none;"></div>
+
+            <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const dropzone = document.getElementById('dropzone-{{ register.id }}');
+                const fileInput = document.getElementById('registerFile-{{ register.id }}');
+                const dropzoneText = document.getElementById('dropzone-text-{{ register.id }}');
+                const uploadForm = document.getElementById('uploadForm-{{ register.id }}');
+                const uploadProgress = document.getElementById('uploadProgress-{{ register.id }}');
+                const progressBar = document.getElementById('progressBar-{{ register.id }}');
+                const progressText = document.getElementById('progressText-{{ register.id }}');
+                const progressPercent = document.getElementById('progressPercent-{{ register.id }}');
+                const fileInfo = document.getElementById('fileInfo-{{ register.id }}');
+                const uploadStatus = document.getElementById('uploadStatus-{{ register.id }}');
+                const submitButton = uploadForm.querySelector('button[type="submit"]');
+
+                if (!dropzone || !fileInput || !dropzoneText) {
+                    console.error('Dropzone elements not found');
+                    return;
+                }
+
+                let currentFile = null;
+
+                // Click opens file picker
+                dropzone.addEventListener('click', () => fileInput.click());
+
+                // File input change handler
+                fileInput.addEventListener('change', function() {
+                    if (this.files.length > 0) {
+                        handleFileSelection(this.files[0]);
+                    }
+                });
+
+                // Dragover / dragenter to highlight
+                ['dragover', 'dragenter'].forEach(event => {
+                    dropzone.addEventListener(event, (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        dropzone.classList.add('bg-light', 'border-primary');
+                    });
+                });
+
+                // Remove highlight on dragleave
+                dropzone.addEventListener('dragleave', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    const rect = dropzone.getBoundingClientRect();
+                    const isLeavingDropzone = (
+                        e.clientX <= rect.left ||
+                        e.clientX >= rect.right ||
+                        e.clientY <= rect.top ||
+                        e.clientY >= rect.bottom
+                    );
+                    
+                    if (isLeavingDropzone) {
+                        dropzone.classList.remove('bg-light', 'border-primary');
+                    }
+                });
+
+                // Drop file
+                dropzone.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    dropzone.classList.remove('bg-light', 'border-primary');
+
+                    const files = e.dataTransfer.files;
+                    if (files.length > 0) {
+                        fileInput.files = files;
+                        handleFileSelection(files[0]);
+                    }
+                });
+
+                function handleFileSelection(file) {
+                    currentFile = file;
+                    dropzoneText.textContent = `Selected: ${file.name}`;
+                    dropzone.classList.add('border-success');
+                    
+                    // Show file info
+                    const fileSize = (file.size / 1024 / 1024).toFixed(2);
+                    fileInfo.textContent = `File: ${file.name} (${fileSize} MB)`;
+                    
+                    // Reset progress and show progress section
+                    resetProgress();
+                    uploadProgress.style.display = 'block';
+                    
+                    console.log('File selected:', file.name, `${fileSize} MB`);
+                }
+
+                function resetProgress() {
+                    progressBar.style.width = '0%';
+                    progressBar.classList.remove('bg-success', 'bg-danger');
+                    progressBar.classList.add('bg-primary');
+                    progressPercent.textContent = '0%';
+                    progressText.textContent = 'Ready to upload';
+                    uploadStatus.style.display = 'none';
+                }
+
+                function updateProgress(percentage, text = 'Uploading...') {
+                    progressBar.style.width = percentage + '%';
+                    progressPercent.textContent = percentage + '%';
+                    progressText.textContent = text;
+                    
+                    if (percentage >= 100) {
+                        progressBar.classList.remove('bg-primary');
+                        progressBar.classList.add('bg-success');
+                    }
+                }
+
+                function showStatus(message, type = 'success') {
+                    uploadStatus.textContent = message;
+                    uploadStatus.className = `alert alert-${type} mt-3`;
+                    uploadStatus.style.display = 'block';
+                }
+
+                // Form submission with progress (using Fetch API but preserving form data)
+                uploadForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    if (!currentFile) {
+                        showStatus('Please select a file first.', 'warning');
+                        return;
+                    }
+
+                    // Disable submit button during upload
+                    submitButton.disabled = true;
+                    submitButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Uploading...';
+
+                    const formData = new FormData(uploadForm); // This includes ALL form fields
+
+                    const xhr = new XMLHttpRequest();
+                    
+                    // Progress event
+                    xhr.upload.addEventListener('progress', function(e) {
+                        if (e.lengthComputable) {
+                            const percentComplete = (e.loaded / e.total) * 100;
+                            updateProgress(Math.round(percentComplete), 'Uploading...');
+                        }
+                    });
+                    
+                    // Load event (completed)
+                    xhr.addEventListener('load', function() {
+                        if (xhr.status === 200) {
+                            updateProgress(100, 'Upload complete!');
+                            showStatus('File uploaded successfully! Refreshing page...', 'success');
+                            
+                            // Refresh the page after a short delay
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 500); // 1 second delay to show success message
+                            
+                        } else {
+                            updateProgress(100, 'Upload failed');
+                            progressBar.classList.remove('bg-primary');
+                            progressBar.classList.add('bg-danger');
+                            showStatus('Upload failed: ' + xhr.statusText, 'danger');
+                            submitButton.disabled = false;
+                            submitButton.innerHTML = 'Upload';
+                        }
+                    });
+                    
+                    // Error event
+                    xhr.addEventListener('error', function() {
+                        updateProgress(100, 'Upload failed');
+                        progressBar.classList.remove('bg-primary');
+                        progressBar.classList.add('bg-danger');
+                        showStatus('Upload failed. Please try again.', 'danger');
+                        submitButton.disabled = false;
+                        submitButton.innerHTML = 'Upload';
+                    });
+                    
+                    // Abort event
+                    xhr.addEventListener('abort', function() {
+                        updateProgress(0, 'Upload cancelled');
+                        showStatus('Upload cancelled.', 'warning');
+                        submitButton.disabled = false;
+                        submitButton.innerHTML = 'Upload';
+                    });
+                    
+                    // Start upload
+                    updateProgress(0, 'Starting upload...');
+                    xhr.open('POST', uploadForm.action);
+                    
+                    // Set any required headers (like CSRF token)
+                    const csrfToken = document.querySelector('input[name="csrf_token"]') || 
+                                     document.querySelector('meta[name="csrf-token"]') ||
+                                     document.querySelector('input[name="_csrf_token"]');
+                    
+                    if (csrfToken) {
+                        const tokenValue = csrfToken.getAttribute('content') || csrfToken.value;
+                        xhr.setRequestHeader('X-CSRF-Token', tokenValue);
+                    }
+                    
+                    xhr.send(formData);
+                });
+
+                // Reset progress when modal is opened
+                const modal = document.getElementById('uploadModal-{{ register.id }}');
+                if (modal) {
+                    modal.addEventListener('show.bs.modal', function() {
+                        resetProgress();
+                        uploadProgress.style.display = 'none';
+                        dropzone.classList.remove('border-success');
+                        dropzoneText.textContent = 'Drag & drop a file here';
+                        fileInput.value = '';
+                        currentFile = null;
+                        
+                        // Re-enable submit button
+                        if (submitButton) {
+                            submitButton.disabled = false;
+                            submitButton.innerHTML = 'Upload';
+                        }
+                    });
+
+                    ['dragover', 'drop'].forEach(event => {
+                        modal.addEventListener(event, (e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                        });
+                    });
+                }
+            });
+            </script>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-primary">Upload</button>
+        </div>
+        </div>
+    </form>
+    </div>
+</div>

@@ -1,0 +1,102 @@
+<button type="button" class="btn btn-sm btn-outline-success" title="Add" data-bs-toggle="modal" data-bs-target="#viewAddRegisterModal{{ week.id }}">
+    <i class="bi bi-plus"></i>
+</button>
+<div class="modal fade" id="viewAddRegisterModal{{ week.id }}" tabindex="-1" aria-labelledby="viewAddRegisterModal{{ week.id }}" aria-hidden="true">
+  <div class="modal-dialog modal-fullscreen">
+    <div class="modal-content h-100">
+      <div class="modal-header py-1 px-2 align-items-center" style="min-height:32px;">
+        <button type="button" class="btn-close ms-2" data-bs-dismiss="modal" aria-label="Close" style="width:1.5rem;height:1.5rem;"></button>
+      </div>
+      <div class="modal-body p-1 m-0 h-100 position-relative">
+        <button type="button" class="btn btn-sm btn-primary mb-2" data-bs-dismiss="modal" aria-label="set_all_{{ week.id }}">
+            Set All
+        </button>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const setAllButton = document.querySelector('button[aria-label="set_all_{{ week.id }}"]');
+                setAllButton.addEventListener('click', function() {
+                    const selects = document.querySelectorAll('.status-select-{{ week.id }}');
+                    const status = prompt("Enter status ({{ ', '.join(statuses)}}):");
+                    const validStatuses = "{{ ', '.join(statuses) }}".split(", ").map(s => s.trim());
+                    if (status && validStatuses.includes(status)) {
+                        selects.forEach(select => {
+                            if (!select.disabled)  // Skip disabled selects
+                                select.value = status;
+                        });
+                    } else if (status) {
+                        alert("Invalid status entered!");
+                    }
+                });
+            });
+        </script>
+        <form method="POST" action="{{ url_for('register.add_school_register', week_id = week.id, school_id=school.id) }}" enctype="multipart/form-data">
+            {% if school and week %}
+            <!-- Attendance Table -->
+            <div class="table-responsive mt-4">
+            <table class="table table-bordered table-sm table-striped table-nowrap" style="font-size: 0.85rem;">
+                <thead class="table-light">
+                <tr>
+                    <th class="py-1 px-2">ID Number</th>
+                    <th class="py-1 px-2">Employee</th>
+                    {% for day_offset in range(5) %}
+                    {% set day_date = week.start_date + day_offset|timedelta %}
+                    <th class="py-1 px-2">{{ day_date.strftime("%A") }}<br>{{ day_date.strftime("%d %b") }}</th>
+                    {% endfor %}
+                </tr>
+                </thead>
+                <tbody>
+                {% for emp in school.employees|sort(attribute="surname") %}
+                    {% set ns = namespace(active_any_day=false) %}
+
+                    {% for day_offset in range(5) %}
+                        {% set day_date = week.start_date + day_offset|timedelta %}
+                        {% if (not emp.end_date or emp.end_date >= day_date) and emp.start_date <= day_date %}
+                            {% set ns.active_any_day = true %}
+                        {% endif %}
+                    {% endfor %}
+                    {% if ns.active_any_day %}
+                    <tr>
+                        <th class="py-1 px-2">{{ emp.id_number }}</th>
+                        <td class="py-1 px-2">{{ emp.surname }}, {{ emp.firstname }}</td>
+                        {% for day_offset in range(5) %}
+                        {% set day_date = week.start_date + day_offset|timedelta %}
+                        {% set day_name = day_date.strftime("%A") %}
+                        {% set enabled = (not emp.end_date or emp.end_date >= day_date) and emp.start_date <= day_date %}
+                        {% set default_status_index = statuses.index('present') if enabled else statuses.index('not active') %}
+                        <td class="py-1 px-2">
+                            <select class="status-select status-select-{{ week.id }} px-1 py-0.5 rounded text-xs form-select form-select-sm"
+                                    name="status_{{ emp.id }}_{{ day_name }}" {% if not enabled %}disabled{% endif %}>
+                                {% for status in statuses %}
+                                <option value="{{ status }}"
+                                    {% if loop.index0 == default_status_index %}selected{% endif %}>
+                                    {{ status }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </td>
+                        {% endfor %}
+                    </tr>
+                    {% endif %}
+                {% endfor %}
+                </tbody>
+            </table>
+            </div>
+            {% else %}
+            <div class="alert alert-warning">
+                <strong>Error:</strong> School or Week information is missing. Please go back and select a school and week.
+            </div>
+            {% endif %}
+
+            <div class="mb-2 pt-2">
+            <label class="form-label">Notes</label>
+            <textarea name="notes" class="form-control form-control-sm" rows="2" placeholder="Add notes...">{{ existing_notes if existing_notes else '' }}</textarea>
+            </div>
+            <div class="mb-2">
+            <label class="form-label">Upload File (optional)</label>
+            <input type="file" name="file" class="form-control form-control-sm">
+            <button type="submit" class="btn btn-primary mt-3">Save Register</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
