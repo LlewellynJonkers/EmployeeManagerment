@@ -79,6 +79,8 @@ def download_file(file_id):
     as_attachment = not request.args.get('inline')
     return send_file(file_record.file_path, as_attachment=as_attachment, download_name=file_record.filename)
 
+
+
 @app.template_filter("timedelta")
 def timedelta_filter(value):
     from datetime import timedelta

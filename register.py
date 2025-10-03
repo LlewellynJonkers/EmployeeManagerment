@@ -16,7 +16,7 @@ def school_registers():
     school_id = request.args.get("school_id")
     if school_id:
         school = School.query.filter_by(id=school_id).first()
-        return render_template("single_schools_registers.html",school = school,workweeks=WorkWeek.query.all())
+        return render_template("single_schools_registers.html",school = school,workweeks=WorkWeek.query.all(),statuses=entry_statuses)
     else:
         return redirect(url_for('school.index'))
 
@@ -267,6 +267,48 @@ def register_report():
                            headers=headers,
                            end_week=end_week,
                            weeks=WorkWeek.query.all())
+
+@register_bp.route("/upload_file/<int:register_id>", methods=["POST"])
+@login_required
+def upload_register_file(register_id):
+    register = Register.query.filter_by(id=register_id).first()
+    if not register:
+        flash("Register not found", "danger")
+        return redirect(url_for("register.school_registers"))
+
+    file = request.files.get("register_file")
+    if file and file.filename:
+        filename = secure_filename(
+            f"{register.school.emis}_{register.school.name}_{register.work_week.label}_{datetime.now().strftime('%Y%m%d%H%M%S')}.{file.filename.rsplit('.',1)[1].lower()}"
+        )
+        upload_folder = 'uploads/registers'
+        if not os.path.exists(upload_folder):
+            os.makedirs(upload_folder)
+        file_path = os.path.join(upload_folder, filename)
+        file.save(file_path)
+
+        new_file = File(
+            filename=filename,
+            file_path=file_path,
+            upload_date=datetime.now(),
+            description=f"{register.school.name} register for {register.work_week.label}",
+            file_type="register_file"
+        )
+        db.session.add(new_file)
+        db.session.commit()
+
+        register.file_id = new_file.id
+        db.session.commit()
+
+        register_file = RegisterFile(register_id=register.id, file_id=new_file.id)
+        db.session.add(register_file)
+        db.session.commit()
+
+        flash("File uploaded successfully!", "success")
+    else:
+        flash("No file selected for upload.", "warning")
+
+    return redirect(url_for("register.school_registers", school_id=register.school.id))
 
 
 

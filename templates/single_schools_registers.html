@@ -78,14 +78,21 @@
                     </td>
                     <td>
                         <div class="btn-list flex-nowrap">
-                            <a href="{{ url_for('register.edit_school_register',register_id = register.id) }}" class="btn btn-sm btn-outline-primary">Edit</a>
-                            <a href="{{ url_for('register.view_register', register_id=register.id) }}" class="btn btn-sm btn-outline-secondary">View</a>
+                            <a href="{{ url_for('register.edit_school_register',register_id = register.id) }}" class="btn btn-sm btn-outline-primary" title="Edit">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <!-- <a href="{{ url_for('register.view_register', register_id=register.id) }}" class="btn btn-sm btn-outline-secondary" title="View">
+                                <i class="bi bi-eye"></i>
+                            </a>-->
+                            {% include 'partials/view_register_modal.html' %}
+                            <!-- View File button triggers modal if file exists -->
                             {% set file = register.get_file() %}
                             {% if file %}
-                                <a href="{{ url_for('download_file', file_id=file.id) }}" class="btn btn-sm btn-outline-info">Download File</a>
                                 {% set file_id = file.id %}
                                 {% include 'partials/view_file_modal.html' %}
                             {% endif %}
+                            <!-- Upload button triggers modal -->
+                            {% include 'partials/upload_register_file_modal.html' %}
                         </div>
                     </td>
                 </tr>
@@ -99,7 +106,10 @@
                         </td>
                         <td>
                             <div class="btn-list flex-nowrap">
-                                <a href="{{ url_for('register.add_school_register', school_id=school.id, week_id=week.id) }}" class="btn btn-sm btn-outline-success">Add</a>
+                                <!--<a href="{{ url_for('register.add_school_register', school_id=school.id, week_id=week.id) }}" class="btn btn-sm btn-outline-success" title="Add">
+                                    <i class="bi bi-plus"></i>
+                                </a>-->
+                                {% include 'partials/add_register_modal.html' %}
                             </div>
                         </td>
                     </tr>

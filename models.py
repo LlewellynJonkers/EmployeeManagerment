@@ -112,6 +112,8 @@ class Employee(db.Model):
         cascade="all, delete-orphan"
     )
 
+    
+
 
 class Register(db.Model):
     __tablename__ = "registers"
@@ -146,6 +148,16 @@ class Register(db.Model):
         if self.file_id:
             return File.query.filter_by(id=self.file_id).first()
         return None
+    
+    def get_entries_grouped_by_employee(self):
+        grouped = {}
+        ent = self.entries if self.entries else []
+        entries_ = sorted(ent, key=lambda e: (e.employee.surname, e.employee.firstname))
+        for entry in entries_:
+            if entry.employee_id not in grouped:
+                grouped[entry.employee_id] = []
+            grouped[entry.employee_id].append(entry)
+        return grouped
 
 
 class RegisterEntry(db.Model):

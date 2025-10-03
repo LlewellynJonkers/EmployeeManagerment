@@ -1,0 +1,5 @@
+/* Add to your CSS */
+.dropzone-active {
+    background-color: #e9ecef !important;
+    border-color: #0d6efd !important;
+}
